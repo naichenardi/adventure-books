@@ -14,6 +14,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,8 +54,23 @@ public class BookLoaderService {
 
     public Book loadBook(Resource resource) {
         try {
-            BookDto bookDto = objectMapper.readValue(resource.getInputStream(), BookDto.class);
+            byte[] content = resource.getInputStream().readAllBytes();
+            String json = new String(content, StandardCharsets.UTF_8);
+            String normalizedJson = json.replace("\uFEFF", "").trim();
+            if (normalizedJson.isEmpty()) {
+                throw new IllegalStateException("Book resource is empty: " + resource.getFilename());
+            }
+
+            BookDto bookDto;
+            try {
+                bookDto = objectMapper.readValue(content, BookDto.class);
+            } catch (Exception exception) {
+                throw new IllegalStateException("Invalid JSON format in book resource: " + resource.getFilename(), exception);
+            }
+
             return mapToBook(bookDto);
+        } catch (IllegalStateException exception) {
+            throw exception;
         } catch (Exception e) {
             throw new IllegalStateException("Unable to parse book resource: " + resource.getFilename(), e);
         }

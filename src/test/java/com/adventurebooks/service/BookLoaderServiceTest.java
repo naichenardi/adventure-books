@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -52,7 +51,7 @@ class BookLoaderServiceTest {
         ByteArrayResource secondResource = createResource("second.json");
         when(resourcePatternResolver.getResources("classpath*:books/*.json"))
                 .thenReturn(new ByteArrayResource[]{firstResource, secondResource});
-        when(objectMapper.readValue(any(InputStream.class), eq(BookDto.class)))
+        when(objectMapper.readValue(any(byte[].class), eq(BookDto.class)))
                 .thenReturn(
                         new BookDto("The Prisoner", "Daniel El Fuego", Difficulty.HARD, List.of()),
                         new BookDto("Dragon Quest", "Anya Stone", Difficulty.HARD, List.of())
@@ -67,8 +66,8 @@ class BookLoaderServiceTest {
 
     @Test
     void loadBookMapsDtoToEntityGraph() {
-        ByteArrayResource resource = createResource("dragon-quest.json");
-        when(objectMapper.readValue(any(InputStream.class), eq(BookDto.class)))
+        ByteArrayResource resource = createResource("dragon-quest.json", "{\"title\":\"Dragon Quest\"}");
+        when(objectMapper.readValue(any(byte[].class), eq(BookDto.class)))
                 .thenReturn(new BookDto(
                         "Dragon Quest",
                         "Anya Stone",
@@ -118,17 +117,29 @@ class BookLoaderServiceTest {
     }
 
     @Test
-    void loadBookThrowsWhenMapperFails() {
-        ByteArrayResource resource = createResource("broken.json");
-        when(objectMapper.readValue(any(InputStream.class), eq(BookDto.class)))
-                .thenThrow(new RuntimeException("boom"));
+    void loadBookThrowsWhenJsonIsEmpty() {
+        ByteArrayResource resource = createResource("empty.json", "   ");
 
         IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
                 () -> service.loadBook(resource)
         );
 
-        assertTrue(exception.getMessage().contains("Unable to parse book resource"));
+        assertTrue(exception.getMessage().contains("Book resource is empty: empty.json"));
+    }
+
+    @Test
+    void loadBookThrowsWhenJsonFormatIsInvalid() {
+        ByteArrayResource resource = createResource("broken.json", "{");
+        when(objectMapper.readValue(any(byte[].class), eq(BookDto.class)))
+                .thenThrow(new RuntimeException("invalid json"));
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> service.loadBook(resource)
+        );
+
+        assertTrue(exception.getMessage().contains("Invalid JSON format in book resource: broken.json"));
     }
 
     @Test
@@ -142,7 +153,11 @@ class BookLoaderServiceTest {
     }
 
     private ByteArrayResource createResource(String filename) {
-        return new ByteArrayResource("{}".getBytes(StandardCharsets.UTF_8)) {
+        return createResource(filename, "{}");
+    }
+
+    private ByteArrayResource createResource(String filename, String content) {
+        return new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)) {
             @Override
             public String getFilename() {
                 return filename;

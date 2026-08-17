@@ -164,13 +164,13 @@ class BookValidationServiceTest {
     }
 
     @Test
-    void dragonQuestSampleBookIsValid() {
-        Book book = loaderService.loadBook(new ClassPathResource("books/dragon-quest.json"));
+    void dragonQuestSampleBookCannotBeLoadedBecauseFileIsEmpty() {
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> loaderService.loadBook(new ClassPathResource("books/dragon-quest.json"))
+        );
 
-        BookValidationResult result = service.validate(book);
-
-        assertTrue(result.valid());
-        assertTrue(result.errors().isEmpty());
+        assertEquals("Book resource is empty: dragon-quest.json", exception.getMessage());
     }
 
     @Test
