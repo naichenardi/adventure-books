@@ -8,6 +8,7 @@ import com.adventurebooks.model.enums.ConsequenceType;
 import com.adventurebooks.model.enums.Difficulty;
 import com.adventurebooks.model.enums.SectionType;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class BookLoaderServiceTest {
 
     private final BookLoaderService service = new BookLoaderService(
@@ -47,12 +49,12 @@ class BookLoaderServiceTest {
         assertEquals(Difficulty.HARD, book.getDifficulty());
         assertEquals(6, book.getSections().size());
 
-        Section firstSection = book.getSections().get(0);
+        Section firstSection = book.getSections().getFirst();
         assertEquals("1", firstSection.getId());
         assertEquals(SectionType.BEGIN, firstSection.getType());
         assertEquals(2, firstSection.getOptions().size());
 
-        Option firstOption = firstSection.getOptions().get(0);
+        Option firstOption = firstSection.getOptions().getFirst();
         assertEquals("Explore the ruined gate", firstOption.getDescription());
         assertEquals("2", firstOption.getGotoId());
         assertNull(firstOption.getConsequence());
@@ -73,7 +75,7 @@ class BookLoaderServiceTest {
                 .findFirst()
                 .orElseThrow();
 
-        Option option = section20.getOptions().get(0);
+        Option option = section20.getOptions().getFirst();
         Consequence consequence = option.getConsequence();
 
         assertNotNull(consequence);

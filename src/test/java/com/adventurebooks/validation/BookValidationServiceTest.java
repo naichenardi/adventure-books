@@ -6,11 +6,13 @@ import com.adventurebooks.model.entity.Section;
 import com.adventurebooks.model.enums.Difficulty;
 import com.adventurebooks.model.enums.SectionType;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class BookValidationServiceTest {
 
     private final BookValidationService service = new BookValidationService();
