@@ -41,8 +41,8 @@ class BookControllerTest {
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
-        assertEquals("Forest", response.getBody().get(0).getId());
-        assertEquals(DifficultyDto.EASY, response.getBody().get(0).getDifficulty());
+        assertEquals("Forest", response.getBody().getFirst().getId());
+        assertEquals(DifficultyDto.EASY, response.getBody().getFirst().getDifficulty());
     }
 
     @Test
