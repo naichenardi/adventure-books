@@ -9,9 +9,8 @@ import com.adventurebooks.model.entity.Option;
 import com.adventurebooks.model.entity.Section;
 import com.adventurebooks.model.entity.Consequence;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
@@ -23,13 +22,16 @@ public class BookLoaderService {
 
     private final ObjectMapper objectMapper;
     private final String booksPath;
-    private final PathMatchingResourcePatternResolver resourcePatternResolver;
+    private final ResourcePatternResolver resourcePatternResolver;
 
-    public BookLoaderService(ObjectMapper objectMapper, ApplicationContext applicationContext,
-                            @Value("${adventure-books.books-path:books}") String booksPath) {
+    public BookLoaderService(
+            ObjectMapper objectMapper,
+            ResourcePatternResolver resourcePatternResolver,
+            @Value("${adventure-books.books-path:books}") String booksPath
+    ) {
         this.objectMapper = objectMapper;
         this.booksPath = booksPath;
-        this.resourcePatternResolver = new PathMatchingResourcePatternResolver(applicationContext);
+        this.resourcePatternResolver = resourcePatternResolver;
     }
 
     public List<Book> loadBooks() {

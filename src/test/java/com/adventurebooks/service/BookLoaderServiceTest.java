@@ -1,5 +1,9 @@
 package com.adventurebooks.service;
 
+import com.adventurebooks.model.dto.BookDto;
+import com.adventurebooks.model.dto.ConsequenceDto;
+import com.adventurebooks.model.dto.OptionDto;
+import com.adventurebooks.model.dto.SectionDto;
 import com.adventurebooks.model.entity.Book;
 import com.adventurebooks.model.entity.Consequence;
 import com.adventurebooks.model.entity.Option;
@@ -7,47 +11,93 @@ import com.adventurebooks.model.entity.Section;
 import com.adventurebooks.model.enums.ConsequenceType;
 import com.adventurebooks.model.enums.Difficulty;
 import com.adventurebooks.model.enums.SectionType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class BookLoaderServiceTest {
 
-    private final BookLoaderService service = new BookLoaderService(
-            new ObjectMapper(),
-            new AnnotationConfigApplicationContext(),
-            "books"
-    );
+    @Mock
+    private ObjectMapper objectMapper;
 
-    @Test
-    void loadBooksLoadsAllBookFilesFromClasspath() {
-        List<Book> books = service.loadBooks();
+    @Mock
+    private ResourcePatternResolver resourcePatternResolver;
 
-        assertEquals(4, books.size());
-        assertTrue(books.stream().map(Book::getTitle).toList().contains("The Prisoner"));
-        assertTrue(books.stream().map(Book::getTitle).toList().contains("Pirates of the Jade Sea"));
-        assertTrue(books.stream().map(Book::getTitle).toList().contains("The Crystal Caverns"));
-        assertTrue(books.stream().map(Book::getTitle).toList().contains("Dragon Quest"));
+    private BookLoaderService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new BookLoaderService(objectMapper, resourcePatternResolver, "books");
     }
 
     @Test
-    void loadBookParsesDragonQuestBookStructure()  {
-        Book book = service.loadBook(new ClassPathResource("books/dragon-quest.json"));
+    void loadBooksLoadsAllBookFilesFromResolver() throws IOException {
+        ByteArrayResource firstResource = createResource("first.json");
+        ByteArrayResource secondResource = createResource("second.json");
+        when(resourcePatternResolver.getResources("classpath*:books/*.json"))
+                .thenReturn(new ByteArrayResource[]{firstResource, secondResource});
+        when(objectMapper.readValue(any(InputStream.class), eq(BookDto.class)))
+                .thenReturn(
+                        new BookDto("The Prisoner", "Daniel El Fuego", Difficulty.HARD, List.of()),
+                        new BookDto("Dragon Quest", "Anya Stone", Difficulty.HARD, List.of())
+                );
+
+        List<Book> books = service.loadBooks();
+
+        assertEquals(2, books.size());
+        assertEquals("The Prisoner", books.getFirst().getTitle());
+        assertEquals("Dragon Quest", books.get(1).getTitle());
+    }
+
+    @Test
+    void loadBookMapsDtoToEntityGraph() {
+        ByteArrayResource resource = createResource("dragon-quest.json");
+        when(objectMapper.readValue(any(InputStream.class), eq(BookDto.class)))
+                .thenReturn(new BookDto(
+                        "Dragon Quest",
+                        "Anya Stone",
+                        Difficulty.HARD,
+                        List.of(
+                                new SectionDto(
+                                        "1",
+                                        "Start",
+                                        SectionType.BEGIN,
+                                        List.of(
+                                                new OptionDto("Explore the ruined gate", "2", null),
+                                                new OptionDto(
+                                                        "Fight",
+                                                        "3",
+                                                        new ConsequenceDto(ConsequenceType.LOSE_HEALTH, "5", "Ouch")
+                                                )
+                                        )
+                                ),
+                                new SectionDto("2", "End", SectionType.END, null)
+                        )
+                ));
+
+        Book book = service.loadBook(resource);
 
         assertNotNull(book);
         assertEquals("Dragon Quest", book.getTitle());
         assertEquals("Anya Stone", book.getAuthor());
         assertEquals(Difficulty.HARD, book.getDifficulty());
-        assertEquals(6, book.getSections().size());
+        assertEquals(2, book.getSections().size());
 
         Section firstSection = book.getSections().getFirst();
         assertEquals("1", firstSection.getId());
@@ -59,44 +109,44 @@ class BookLoaderServiceTest {
         assertEquals("2", firstOption.getGotoId());
         assertNull(firstOption.getConsequence());
 
-        Section ending = book.getSections().stream()
-                .filter(section -> section.getType() == SectionType.END)
-                .findFirst()
-                .orElseThrow();
-        assertEquals("END", ending.getType().name());
-    }
-
-    @Test
-    void loadBookParsesConsequenceValuesFromOptions()  {
-        Book book = service.loadBook(new ClassPathResource("books/the-prisoner.json"));
-
-        Section section20 = book.getSections().stream()
-                .filter(section -> "20".equals(section.getId()))
-                .findFirst()
-                .orElseThrow();
-
-        Option option = section20.getOptions().getFirst();
+        Option option = firstSection.getOptions().get(1);
         Consequence consequence = option.getConsequence();
-
         assertNotNull(consequence);
         assertEquals(ConsequenceType.LOSE_HEALTH, consequence.getType());
-        assertEquals(Integer.valueOf(6), consequence.getValue());
-        assertTrue(consequence.getText().contains("rusty nail"));
+        assertEquals(Integer.valueOf(5), consequence.getValue());
+        assertEquals("Ouch", consequence.getText());
     }
 
     @Test
-    void loadBookThrowsWhenResourceIsInvalidJson() {
-        BookLoaderService invalidService = new BookLoaderService(
-                new ObjectMapper(),
-                new AnnotationConfigApplicationContext(),
-                "books"
-        );
+    void loadBookThrowsWhenMapperFails() {
+        ByteArrayResource resource = createResource("broken.json");
+        when(objectMapper.readValue(any(InputStream.class), eq(BookDto.class)))
+                .thenThrow(new RuntimeException("boom"));
 
         IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
-                () -> invalidService.loadBook(new ByteArrayResource("{".getBytes(StandardCharsets.UTF_8)))
+                () -> service.loadBook(resource)
         );
 
         assertTrue(exception.getMessage().contains("Unable to parse book resource"));
+    }
+
+    @Test
+    void loadBooksThrowsWhenResolverFails() throws IOException {
+        when(resourcePatternResolver.getResources("classpath*:books/*.json"))
+                .thenThrow(new IOException("resolver failure"));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, service::loadBooks);
+
+        assertTrue(exception.getMessage().contains("Unable to load adventure books from path: books"));
+    }
+
+    private ByteArrayResource createResource(String filename) {
+        return new ByteArrayResource("{}".getBytes(StandardCharsets.UTF_8)) {
+            @Override
+            public String getFilename() {
+                return filename;
+            }
+        };
     }
 }

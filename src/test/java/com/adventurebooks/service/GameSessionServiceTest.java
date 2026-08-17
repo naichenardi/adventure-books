@@ -6,18 +6,22 @@ import com.adventurebooks.model.entity.Section;
 import com.adventurebooks.model.enums.Difficulty;
 import com.adventurebooks.model.enums.SectionType;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class GameSessionServiceTest {
+
+    @InjectMocks
+    private GameSessionService service;
 
     @Test
     void newSessionStartsAtBeginningWithFullHealth() {
-        GameSessionService service = new GameSessionService();
         Book book = new Book("Demo", "Author", Difficulty.EASY, List.of(
                 new Section("1", "Start", SectionType.BEGIN, List.of()),
                 new Section("2", "End", SectionType.END, List.of())
@@ -34,7 +38,6 @@ class GameSessionServiceTest {
 
     @Test
     void saveAndHealthUpdateBehaveAsExpected() {
-        GameSessionService service = new GameSessionService();
         Book book = new Book("Demo", "Author", Difficulty.EASY, List.of(
                 new Section("1", "Start", SectionType.BEGIN, List.of()),
                 new Section("2", "End", SectionType.END, List.of())
@@ -51,7 +54,6 @@ class GameSessionServiceTest {
 
     @Test
     void zeroHealthEndsTheSession() {
-        GameSessionService service = new GameSessionService();
         Book book = new Book("Demo", "Author", Difficulty.EASY, List.of(
                 new Section("1", "Start", SectionType.BEGIN, List.of()),
                 new Section("2", "End", SectionType.END, List.of())
