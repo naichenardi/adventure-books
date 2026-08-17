@@ -1,0 +1,89 @@
+﻿{
+  "title": "Dragon Quest",
+  "author": "Anya Stone",
+  "difficulty": "HARD",
+  "sections": [
+    {
+      "id": 1,
+      "text": "You stand before the ruined gate of a forgotten mountain temple. A dragon's shadow circles above the clouds.",
+      "type": "BEGIN",
+      "options": [
+        {
+          "description": "Explore the ruined gate",
+          "gotoId": 2
+        },
+        {
+          "description": "Follow the hidden trail into the forest",
+          "gotoId": 3
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "text": "Inside the gate, a rusted mechanism hums to life. The stones tremble beneath your boots.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Open the mechanism and continue",
+          "gotoId": 4
+        },
+        {
+          "description": "Run back outside",
+          "gotoId": 1,
+          "consequence": {
+            "type": "LOSE_HEALTH",
+            "value": "2",
+            "text": "You slip on the broken steps and scrape your knee."
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "text": "The forest trail narrows to a cliff edge. You hear a roar from the valley below.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Climb toward the dragon's perch",
+          "gotoId": 5
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "text": "The ancient mechanism reveals a hidden staircase descending into the mountain core.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Descend into the mountain",
+          "gotoId": 100
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "text": "The dragon notices you and breathes a stream of fire across the cliff face.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Dodge the fire and charge forward",
+          "gotoId": 100,
+          "consequence": {
+            "type": "LOSE_HEALTH",
+            "value": "5",
+            "text": "The heat singes your armor and leaves you wounded."
+          }
+        },
+        {
+          "description": "Hide behind the rocks and wait",
+          "gotoId": 4
+        }
+      ]
+    },
+    {
+      "id": 100,
+      "text": "You reach the dragon's lair and stand face to face with the beast. The myth becomes your truth.",
+      "type": "END"
+    }
+  ]
+}
