@@ -1,8 +1,7 @@
 package com.adventurebooks.service;
 
-import com.adventurebooks.model.entity.Book;
-import com.adventurebooks.model.entity.GameSession;
-import com.adventurebooks.model.entity.Section;
+import com.adventurebooks.model.entity.*;
+import com.adventurebooks.model.enums.ConsequenceType;
 import com.adventurebooks.model.enums.Difficulty;
 import com.adventurebooks.model.enums.SectionType;
 import org.junit.jupiter.api.Test;
@@ -64,5 +63,21 @@ class GameSessionServiceTest {
 
         assertEquals(0, service.getSession(session.getId()).orElseThrow().getHealth());
         assertFalse(service.getSession(session.getId()).orElseThrow().isActive());
+    }
+
+    @Test
+    void chooseOptionAdvancesSessionAndAppliesConsequence() {
+        Option option = new Option("Fight", "2", new Consequence(ConsequenceType.LOSE_HEALTH, 3, "You were hurt"));
+        Book book = new Book("Demo", "Author", Difficulty.EASY, List.of(
+                new Section("1", "Start", SectionType.BEGIN, List.of(option)),
+                new Section("2", "End", SectionType.END, List.of())
+        ));
+        GameSession session = service.startNewSession(book);
+
+        GameSession updated = service.chooseOption(session.getId(), book, 0);
+
+        assertEquals("2", updated.getCurrentSectionId());
+        assertEquals(7, updated.getHealth());
+        assertFalse(updated.isActive());
     }
 }

@@ -1,13 +1,16 @@
 package com.adventurebooks.service;
 
-import com.adventurebooks.model.dto.BookDto;
-import com.adventurebooks.model.dto.SectionDto;
-import com.adventurebooks.model.dto.OptionDto;
-import com.adventurebooks.model.dto.ConsequenceDto;
+import com.adventurebooks.generated.model.BookDto;
+import com.adventurebooks.generated.model.ConsequenceDto;
+import com.adventurebooks.generated.model.OptionDto;
+import com.adventurebooks.generated.model.SectionDto;
 import com.adventurebooks.model.entity.Book;
+import com.adventurebooks.model.entity.Consequence;
 import com.adventurebooks.model.entity.Option;
 import com.adventurebooks.model.entity.Section;
-import com.adventurebooks.model.entity.Consequence;
+import com.adventurebooks.model.enums.ConsequenceType;
+import com.adventurebooks.model.enums.Difficulty;
+import com.adventurebooks.model.enums.SectionType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -78,37 +81,43 @@ public class BookLoaderService {
 
     private Book mapToBook(BookDto bookDto) {
         List<Section> sections = new ArrayList<>();
-        if (bookDto.sections() != null) {
-            for (SectionDto sectionDto : bookDto.sections()) {
+        if (bookDto.getSections() != null) {
+            for (SectionDto sectionDto : bookDto.getSections()) {
                 sections.add(mapToSection(sectionDto));
             }
         }
 
-        return new Book(bookDto.title(), bookDto.author(), bookDto.difficulty(), sections);
+        Difficulty difficulty = bookDto.getDifficulty() != null
+                ? Difficulty.valueOf(bookDto.getDifficulty().getValue())
+                : null;
+
+        return new Book(bookDto.getTitle(), bookDto.getAuthor(), difficulty, sections);
     }
 
     private Section mapToSection(SectionDto sectionDto) {
         List<Option> options = new ArrayList<>();
-        if (sectionDto.options() != null) {
-            for (OptionDto optionDto : sectionDto.options()) {
+        if (sectionDto.getOptions() != null) {
+            for (OptionDto optionDto : sectionDto.getOptions()) {
                 options.add(mapToOption(optionDto));
             }
         }
 
-        return new Section(sectionDto.id(), sectionDto.text(), sectionDto.type(), options);
+        SectionType type = SectionType.valueOf(sectionDto.getType().getValue());
+        return new Section(sectionDto.getId(), sectionDto.getText(), type, options);
     }
 
     private Option mapToOption(OptionDto optionDto) {
         Consequence consequence = null;
-        if (optionDto.consequence() != null) {
-            ConsequenceDto consequenceDto = optionDto.consequence();
+        if (optionDto.getConsequence() != null) {
+            ConsequenceDto consequenceDto = optionDto.getConsequence();
             Integer value = null;
-            if (consequenceDto.value() != null && !consequenceDto.value().isBlank()) {
-                value = Integer.parseInt(consequenceDto.value());
+            if (consequenceDto.getValue() != null && !consequenceDto.getValue().isBlank()) {
+                value = Integer.parseInt(consequenceDto.getValue());
             }
-            consequence = new Consequence(consequenceDto.type(), value, consequenceDto.text());
+            ConsequenceType type = ConsequenceType.valueOf(consequenceDto.getType().getValue());
+            consequence = new Consequence(type, value, consequenceDto.getText());
         }
 
-        return new Option(optionDto.description(), optionDto.gotoId(), consequence);
+        return new Option(optionDto.getDescription(), optionDto.getGotoId(), consequence);
     }
 }

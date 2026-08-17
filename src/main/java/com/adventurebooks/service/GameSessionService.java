@@ -1,10 +1,11 @@
 package com.adventurebooks.service;
 
-import com.adventurebooks.model.entity.Book;
-import com.adventurebooks.model.entity.GameSession;
-import com.adventurebooks.model.entity.Section;
+import com.adventurebooks.model.entity.*;
+import com.adventurebooks.model.enums.ConsequenceType;
+import com.adventurebooks.model.enums.SectionType;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -60,5 +61,67 @@ public class GameSessionService {
             session.setActive(false);
         }
         return session;
+    }
+
+    public GameSession chooseOption(String sessionId, Book book, int optionIndex) {
+        GameSession session = sessions.get(sessionId);
+        if (session == null) {
+            throw new IllegalArgumentException("Session does not exist: " + sessionId);
+        }
+        if (!session.isActive()) {
+            throw new IllegalStateException("Session is not active: " + sessionId);
+        }
+        if (book == null || book.getSections() == null || book.getSections().isEmpty()) {
+            throw new IllegalArgumentException("Book must contain at least one section.");
+        }
+
+        Section currentSection = findSectionById(book.getSections(), session.getCurrentSectionId())
+                .orElseThrow(() -> new IllegalStateException("Current section does not exist: " + session.getCurrentSectionId()));
+
+        List<Option> options = currentSection.getOptions();
+        if (options == null || options.isEmpty()) {
+            throw new IllegalStateException("Current section has no options: " + currentSection.getId());
+        }
+        if (optionIndex < 0 || optionIndex >= options.size()) {
+            throw new IllegalArgumentException("Invalid option index: " + optionIndex);
+        }
+
+        Option chosen = options.get(optionIndex);
+        applyConsequence(session, chosen.getConsequence());
+
+        String nextSectionId = chosen.getGotoId();
+        Section nextSection = findSectionById(book.getSections(), nextSectionId)
+                .orElseThrow(() -> new IllegalStateException("Next section does not exist: " + nextSectionId));
+
+        session.setCurrentSectionId(nextSectionId);
+        session.addHistory(nextSectionId);
+        session.setSaved(false);
+
+        if (session.getHealth() == 0 || nextSection.getType() == SectionType.END) {
+            session.setActive(false);
+        }
+
+        return session;
+    }
+
+    private Optional<Section> findSectionById(List<Section> sections, String sectionId) {
+        if (sectionId == null) {
+            return Optional.empty();
+        }
+
+        return sections.stream()
+                .filter(section -> section != null && sectionId.equals(section.getId()))
+                .findFirst();
+    }
+
+    private void applyConsequence(GameSession session, Consequence consequence) {
+        if (consequence == null || consequence.getType() == null || consequence.getValue() == null) {
+            return;
+        }
+
+        int delta = consequence.getType() == ConsequenceType.LOSE_HEALTH
+                ? -consequence.getValue()
+                : consequence.getValue();
+        session.setHealth(Math.max(0, session.getHealth() + delta));
     }
 }

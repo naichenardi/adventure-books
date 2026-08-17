@@ -1,9 +1,6 @@
 package com.adventurebooks.service;
 
-import com.adventurebooks.model.dto.BookDto;
-import com.adventurebooks.model.dto.ConsequenceDto;
-import com.adventurebooks.model.dto.OptionDto;
-import com.adventurebooks.model.dto.SectionDto;
+import com.adventurebooks.generated.model.*;
 import com.adventurebooks.model.entity.Book;
 import com.adventurebooks.model.entity.Consequence;
 import com.adventurebooks.model.entity.Option;
@@ -13,11 +10,11 @@ import com.adventurebooks.model.enums.Difficulty;
 import com.adventurebooks.model.enums.SectionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -53,8 +50,8 @@ class BookLoaderServiceTest {
                 .thenReturn(new ByteArrayResource[]{firstResource, secondResource});
         when(objectMapper.readValue(any(byte[].class), eq(BookDto.class)))
                 .thenReturn(
-                        new BookDto("The Prisoner", "Daniel El Fuego", Difficulty.HARD, List.of()),
-                        new BookDto("Dragon Quest", "Anya Stone", Difficulty.HARD, List.of())
+                        bookDtoOf("The Prisoner", "Daniel El Fuego", DifficultyDto.HARD, List.of()),
+                        bookDtoOf("Dragon Quest", "Anya Stone", DifficultyDto.HARD, List.of())
                 );
 
         List<Book> books = service.loadBooks();
@@ -66,29 +63,22 @@ class BookLoaderServiceTest {
 
     @Test
     void loadBookMapsDtoToEntityGraph() {
+        ConsequenceDto consequence = new ConsequenceDto(ConsequenceTypeDto.LOSE_HEALTH);
+        consequence.setValue("5");
+        consequence.setText("Ouch");
+
+        OptionDto optionA = new OptionDto("Explore the ruined gate", "2");
+        OptionDto optionB = new OptionDto("Fight", "3");
+        optionB.setConsequence(consequence);
+
+        SectionDto sectionStart = new SectionDto("1", "Start", SectionTypeDto.BEGIN);
+        sectionStart.setOptions(List.of(optionA, optionB));
+        SectionDto sectionEnd = new SectionDto("2", "End", SectionTypeDto.END);
+
         ByteArrayResource resource = createResource("dragon-quest.json", "{\"title\":\"Dragon Quest\"}");
         when(objectMapper.readValue(any(byte[].class), eq(BookDto.class)))
-                .thenReturn(new BookDto(
-                        "Dragon Quest",
-                        "Anya Stone",
-                        Difficulty.HARD,
-                        List.of(
-                                new SectionDto(
-                                        "1",
-                                        "Start",
-                                        SectionType.BEGIN,
-                                        List.of(
-                                                new OptionDto("Explore the ruined gate", "2", null),
-                                                new OptionDto(
-                                                        "Fight",
-                                                        "3",
-                                                        new ConsequenceDto(ConsequenceType.LOSE_HEALTH, "5", "Ouch")
-                                                )
-                                        )
-                                ),
-                                new SectionDto("2", "End", SectionType.END, null)
-                        )
-                ));
+                .thenReturn(bookDtoOf("Dragon Quest", "Anya Stone", DifficultyDto.HARD,
+                        List.of(sectionStart, sectionEnd)));
 
         Book book = service.loadBook(resource);
 
@@ -109,11 +99,11 @@ class BookLoaderServiceTest {
         assertNull(firstOption.getConsequence());
 
         Option option = firstSection.getOptions().get(1);
-        Consequence consequence = option.getConsequence();
-        assertNotNull(consequence);
-        assertEquals(ConsequenceType.LOSE_HEALTH, consequence.getType());
-        assertEquals(Integer.valueOf(5), consequence.getValue());
-        assertEquals("Ouch", consequence.getText());
+        Consequence domainConsequence = option.getConsequence();
+        assertNotNull(domainConsequence);
+        assertEquals(ConsequenceType.LOSE_HEALTH, domainConsequence.getType());
+        assertEquals(Integer.valueOf(5), domainConsequence.getValue());
+        assertEquals("Ouch", domainConsequence.getText());
     }
 
     @Test
@@ -150,6 +140,14 @@ class BookLoaderServiceTest {
         IllegalStateException exception = assertThrows(IllegalStateException.class, service::loadBooks);
 
         assertTrue(exception.getMessage().contains("Unable to load adventure books from path: books"));
+    }
+
+    private BookDto bookDtoOf(String title, String author, DifficultyDto difficulty, List<SectionDto> sections) {
+        BookDto dto = new BookDto(title);
+        dto.setAuthor(author);
+        dto.setDifficulty(difficulty);
+        dto.setSections(sections);
+        return dto;
     }
 
     private ByteArrayResource createResource(String filename) {

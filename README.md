@@ -139,6 +139,29 @@ http://localhost:8080/h2-console
 ```
 ---
 
+## API Overview
+
+> Full API documentation will be expanded as each feature is implemented.
+
+### Books
+
+| Method | Endpoint                   | Description                                              |
+|--------|----------------------------|----------------------------------------------------------|
+| `GET`  | `/api/books`               | List all books (supports search & filter and pagination) |
+| `GET`  | `/api/books/{id}`          | Get a single book by id                                  |
+| `GET`  | `/api/books/{id}/validate` | Validate book against game rules                         |
+
+### Game Sessions *(coming soon)*
+
+| Method | Endpoint                    | Description               |
+|--------|-----------------------------|---------------------------|
+| `POST` | `/api/sessions`             | Start a new game session  |
+| `GET`  | `/api/sessions/{id}`        | Get current session state |
+| `POST` | `/api/sessions/{id}/choose` | Make a section choice     |
+| `POST` | `/api/sessions/{id}/save`   | Save / pause a session    |
+
+---
+---
 ## Development Notes
 
 - Book JSON files placed in `src/test/resources/books/` are loaded automatically on startup (configurable via `adventure-books.books-path` in `application.yaml`).

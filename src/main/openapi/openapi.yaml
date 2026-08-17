@@ -1,0 +1,379 @@
+openapi: 3.0.3
+info:
+  title: Adventure Books API
+  version: 1.0.0
+  description: API contract for Adventure Books application (contract-first)
+servers:
+  - url: http://localhost:8080
+    description: Local server
+paths:
+  /api/books:
+    get:
+      tags:
+        - Book
+      summary: List books
+      operationId: listBooks
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+        - name: difficulty
+          in: query
+          schema:
+            $ref: '#/components/schemas/Difficulty'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/books/{id}:
+    get:
+      tags:
+        - Book
+      summary: Get a book by id
+      operationId: getBookById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/books/{id}/validate:
+    get:
+      tags:
+        - Book
+      summary: Validate a book
+      operationId: validateBook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookValidationResult'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/sessions:
+    post:
+      tags:
+        - Session
+      summary: Start a new game session
+      operationId: startSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartSessionRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSession'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/sessions/{id}:
+    get:
+      tags:
+        - Session
+      summary: Get current session state
+      operationId: getSessionById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSession'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/sessions/{id}/choose:
+    post:
+      tags:
+        - Session
+      summary: Make a section choice
+      operationId: chooseOption
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChooseRequest'
+      responses:
+        '200':
+          description: Updated session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSession'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/sessions/{id}/save:
+    post:
+      tags:
+        - Session
+      summary: Save / pause a session
+      operationId: saveSession
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSession'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+    Difficulty:
+      type: string
+      enum:
+        - EASY
+        - MEDIUM
+        - HARD
+    Book:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Section'
+      required:
+        - title
+    Section:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        type:
+          $ref: '#/components/schemas/SectionType'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/Option'
+      required:
+        - id
+        - text
+        - type
+    SectionType:
+      type: string
+      enum:
+        - BEGIN
+        - NODE
+        - END
+    Option:
+      type: object
+      properties:
+        description:
+          type: string
+        gotoId:
+          type: string
+        consequence:
+          $ref: '#/components/schemas/Consequence'
+      required:
+        - description
+        - gotoId
+    Consequence:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ConsequenceType'
+        value:
+          type: string
+        text:
+          type: string
+      required:
+        - type
+    ConsequenceType:
+      type: string
+      enum:
+        - LOSE_HEALTH
+        - GAIN_HEALTH
+    BookValidationResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+      required:
+        - valid
+    StartSessionRequest:
+      type: object
+      properties:
+        bookId:
+          type: string
+      required:
+        - bookId
+    ChooseRequest:
+      type: object
+      properties:
+        optionIndex:
+          type: integer
+      required:
+        - optionIndex
+    GameSession:
+      type: object
+      properties:
+        id:
+          type: string
+        bookId:
+          type: string
+        currentSectionId:
+          type: string
+        health:
+          type: integer
+        finished:
+          type: boolean
+        saved:
+          type: boolean
+        active:
+          type: boolean
+        history:
+          type: array
+          items:
+            type: string
