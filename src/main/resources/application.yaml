@@ -27,3 +27,5 @@ server:
 # Path (relative to classpath) where book JSON files are located
 adventure-books:
   books-path: books
+  cors:
+    allowed-origins: http://localhost:4200

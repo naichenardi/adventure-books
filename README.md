@@ -14,6 +14,7 @@ An interactive adventure book application built with **Angular** (frontend) and 
 - [Getting Started](#getting-started)
 - [API Overview](#api-overview)
 - [Development Notes](#development-notes)
+- [Frontend - Angular](frontend/README.md)
 
 ---
 
