@@ -1,11 +1,11 @@
 package com.adventurebooks.controller;
 
 import com.adventurebooks.generated.api.BookApi;
-import com.adventurebooks.generated.model.*;
+import com.adventurebooks.generated.model.BookDto;
+import com.adventurebooks.generated.model.BookValidationResultDto;
+import com.adventurebooks.generated.model.DifficultyDto;
+import com.adventurebooks.mapper.BookMapper;
 import com.adventurebooks.model.entity.Book;
-import com.adventurebooks.model.entity.Consequence;
-import com.adventurebooks.model.entity.Option;
-import com.adventurebooks.model.entity.Section;
 import com.adventurebooks.model.enums.Difficulty;
 import com.adventurebooks.service.BookService;
 import com.adventurebooks.validation.BookValidationResult;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,9 +22,11 @@ import java.util.stream.Collectors;
 public class BookController implements BookApi {
 
     private final BookService bookService;
+    private final BookMapper bookMapper;
 
-    public BookController(BookService bookService) {
+    public BookController(BookService bookService, BookMapper bookMapper) {
         this.bookService = bookService;
+        this.bookMapper = bookMapper;
     }
 
     @Override
@@ -38,8 +39,7 @@ public class BookController implements BookApi {
         }
 
         if (difficulty != null) {
-            Difficulty domainDifficulty =
-                    Difficulty.valueOf(difficulty.getValue());
+            Difficulty domainDifficulty = Difficulty.valueOf(difficulty.getValue());
             books = books.stream()
                     .filter(book -> book.getDifficulty() == domainDifficulty)
                     .collect(Collectors.toList());
@@ -47,16 +47,12 @@ public class BookController implements BookApi {
         if (books.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        List<BookDto> payload = books.stream()
-                .map(this::toApiBook)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(payload);
+        return ResponseEntity.ok(books.stream().map(bookMapper::toDto).collect(Collectors.toList()));
     }
 
     @Override
     public ResponseEntity<BookDto> getBookById(Long id) {
-        Book book = findBookOrThrow(id);
-        return ResponseEntity.ok(toApiBook(book));
+        return ResponseEntity.ok(bookMapper.toDto(findBookOrThrow(id)));
     }
 
     @Override
@@ -70,65 +66,11 @@ public class BookController implements BookApi {
 
     @Override
     public ResponseEntity<BookDto> uploadBook(MultipartFile file) {
-        Book book = bookService.uploadBook(file);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toApiBook(book));
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookMapper.toDto(bookService.uploadBook(file)));
     }
 
     private Book findBookOrThrow(Long id) {
         return bookService.getBookById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found: " + id));
-    }
-
-    private BookDto toApiBook(com.adventurebooks.model.entity.Book domainBook) {
-        BookDto apiBook = new BookDto(domainBook.getTitle());
-        apiBook.setId(domainBook.getId() != null ? domainBook.getId().intValue() : null);
-        apiBook.setAuthor(domainBook.getAuthor());
-
-        if (domainBook.getDifficulty() != null) {
-            apiBook.setDifficulty(DifficultyDto.fromValue(domainBook.getDifficulty().name()));
-        }
-
-        List<SectionDto> sections =
-                domainBook.getSections() == null
-                        ? Collections.emptyList()
-                        : domainBook.getSections().stream().map(this::toApiSection).collect(Collectors.toList());
-        apiBook.setSections(sections);
-        return apiBook;
-    }
-
-    private SectionDto toApiSection(Section domainSection) {
-        SectionDto apiSection = new SectionDto(
-                domainSection.getId(),
-                domainSection.getText(),
-                SectionTypeDto.fromValue(domainSection.getType().name())
-        );
-
-        List<OptionDto> options =
-                domainSection.getOptions() == null
-                        ? Collections.emptyList()
-                        : domainSection.getOptions().stream().map(this::toApiOption).collect(Collectors.toList());
-        apiSection.setOptions(options);
-        return apiSection;
-    }
-
-    private OptionDto toApiOption(Option domainOption) {
-        OptionDto apiOption = new OptionDto(domainOption.getDescription(), domainOption.getGotoId());
-        apiOption.setConsequence(toApiConsequence(domainOption.getConsequence()));
-        return apiOption;
-    }
-
-    private ConsequenceDto toApiConsequence(Consequence domainConsequence) {
-        if (domainConsequence == null || domainConsequence.getType() == null) {
-            return null;
-        }
-
-        ConsequenceDto apiConsequence = new ConsequenceDto(
-                ConsequenceTypeDto.fromValue(domainConsequence.getType().name())
-        );
-        if (domainConsequence.getValue() != null) {
-            apiConsequence.setValue(String.valueOf(domainConsequence.getValue()));
-        }
-        apiConsequence.setText(domainConsequence.getText());
-        return apiConsequence;
     }
 }

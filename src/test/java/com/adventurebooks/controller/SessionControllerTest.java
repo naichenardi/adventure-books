@@ -2,6 +2,8 @@ package com.adventurebooks.controller;
 
 import com.adventurebooks.generated.model.ChooseRequestDto;
 import com.adventurebooks.generated.model.StartSessionRequestDto;
+import com.adventurebooks.mapper.SessionMapper;
+import com.adventurebooks.mapper.SessionMapperImpl;
 import com.adventurebooks.model.entity.Book;
 import com.adventurebooks.model.entity.GameSession;
 import com.adventurebooks.model.entity.Section;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,6 +34,9 @@ class SessionControllerTest {
 
     @Mock
     private GameSessionService gameSessionService;
+
+    @Spy
+    private SessionMapper sessionMapper = new SessionMapperImpl();
 
     @InjectMocks
     private SessionController controller;

@@ -1,6 +1,8 @@
 package com.adventurebooks.controller;
 
 import com.adventurebooks.generated.model.DifficultyDto;
+import com.adventurebooks.mapper.BookMapper;
+import com.adventurebooks.mapper.BookMapperImpl;
 import com.adventurebooks.model.entity.Book;
 import com.adventurebooks.model.entity.Section;
 import com.adventurebooks.model.enums.SectionType;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,6 +29,9 @@ class BookControllerTest {
     @Mock
     private BookService bookService;
 
+    @Spy
+    private BookMapper bookMapper = new BookMapperImpl();
+
     @InjectMocks
     private BookController controller;
 
@@ -41,7 +47,7 @@ class BookControllerTest {
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
-        assertNull(response.getBody().getFirst().getId()); // no id set on transient book
+        assertNull(response.getBody().getFirst().getId());
         assertEquals(DifficultyDto.EASY, response.getBody().getFirst().getDifficulty());
     }
 
