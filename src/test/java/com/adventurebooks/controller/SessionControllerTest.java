@@ -40,43 +40,46 @@ class SessionControllerTest {
         Book book = new Book("Forest", "Ana", Difficulty.EASY, List.of(
                 new Section("1", "Start", SectionType.BEGIN, List.of())
         ));
-        GameSession session = new GameSession("s1", "Forest", "1", 10);
-        when(bookService.getBookById("Forest")).thenReturn(Optional.of(book));
+        book.setId(1L);
+        GameSession session = new GameSession(1L, 1L, "Forest", "1", 10);
+        when(bookService.getBookById(1L)).thenReturn(Optional.of(book));
         when(gameSessionService.startNewSession(book)).thenReturn(session);
 
+        StartSessionRequestDto request = new StartSessionRequestDto(1L);
         ResponseEntity<com.adventurebooks.generated.model.GameSessionDto> response =
-                controller.startSession(new StartSessionRequestDto("Forest"));
+                controller.startSession(request);
 
         assertEquals(201, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertEquals("s1", response.getBody().getId());
-        assertEquals("Forest", response.getBody().getBookId());
+        assertEquals(1L, response.getBody().getId());
+        assertEquals(1L, response.getBody().getBookId());
     }
 
     @Test
     void getSessionThrows404WhenMissing() {
-        when(gameSessionService.getSession("s404")).thenReturn(Optional.empty());
+        when(gameSessionService.getSession(404L)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> controller.getSessionById("s404"));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> controller.getSessionById(404L));
 
         assertEquals(404, exception.getStatusCode().value());
     }
 
     @Test
     void chooseOptionReturnsUpdatedSession() {
-        GameSession session = new GameSession("s1", "Forest", "1", 10);
-        GameSession updated = new GameSession("s1", "Forest", "2", 8);
+        GameSession session = new GameSession(1L, 1L, "Forest", "1", 10);
+        GameSession updated = new GameSession(1L, 1L, "Forest", "2", 8);
         Book book = new Book("Forest", "Ana", Difficulty.EASY, List.of(
                 new Section("1", "Start", SectionType.BEGIN, List.of()),
                 new Section("2", "End", SectionType.END, List.of())
         ));
+        book.setId(1L);
 
-        when(gameSessionService.getSession("s1")).thenReturn(Optional.of(session));
-        when(bookService.getBookById("Forest")).thenReturn(Optional.of(book));
-        when(gameSessionService.chooseOption("s1", book, 0)).thenReturn(updated);
+        when(gameSessionService.getSession(1L)).thenReturn(Optional.of(session));
+        when(bookService.getBookById(1L)).thenReturn(Optional.of(book));
+        when(gameSessionService.chooseOption(1L, book, 0)).thenReturn(updated);
 
         ResponseEntity<com.adventurebooks.generated.model.GameSessionDto> response =
-                controller.chooseOption("s1", new ChooseRequestDto(0));
+                controller.chooseOption(1L, new ChooseRequestDto(0));
 
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());

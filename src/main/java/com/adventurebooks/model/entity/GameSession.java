@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameSession {
-    private String id;
+    private Long id;
+    private Long bookId;
     private String bookTitle;
     private String currentSectionId;
     private int health;
@@ -18,8 +19,9 @@ public class GameSession {
     public GameSession() {
     }
 
-    public GameSession(String id, String bookTitle, String currentSectionId, int health) {
+    public GameSession(Long id, Long bookId, String bookTitle, String currentSectionId, int health) {
         this.id = id;
+        this.bookId = bookId;
         this.bookTitle = bookTitle;
         this.currentSectionId = currentSectionId;
         this.health = health;
@@ -29,12 +31,20 @@ public class GameSession {
         this.updatedAt = startedAt;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(Long bookId) {
+        this.bookId = bookId;
     }
 
     public String getBookTitle() {

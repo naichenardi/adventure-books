@@ -48,9 +48,11 @@ public class BookLoaderService {
 
             for (Resource resource : resources) {
                 if (resource != null && resource.exists()) {
-                    Book book = loadBook(resource);
-                    if (book != null) {
+                    try {
+                        Book book = loadBook(resource);
                         books.add(book);
+                    } catch (IllegalStateException e) {
+                        log.warn("X => Skipping book resource: {}", e.getMessage());
                     }
                 }
             }
@@ -67,8 +69,7 @@ public class BookLoaderService {
             String json = new String(content, StandardCharsets.UTF_8);
             String normalizedJson = json.replace("\uFEFF", "").trim();
             if (normalizedJson.isEmpty()) {
-                log.warn("X => Book resource is empty: {}", resource.getFilename());
-                return null;
+                throw new IllegalStateException("Book resource is empty: " + resource.getFilename());
             }
 
             BookDto bookDto;

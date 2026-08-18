@@ -8,15 +8,16 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class GameSessionService {
 
     private static final int STARTING_HEALTH = 10;
 
-    private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
+    private final Map<Long, GameSession> sessions = new ConcurrentHashMap<>();
+    private final AtomicLong idSequence = new AtomicLong(1);
 
     public GameSession startNewSession(Book book) {
         if (book == null || book.getSections() == null || book.getSections().isEmpty()) {
@@ -29,17 +30,18 @@ public class GameSessionService {
                 .map(Section::getId)
                 .orElseThrow(() -> new IllegalStateException("Book does not contain a valid beginning section."));
 
-        GameSession session = new GameSession(UUID.randomUUID().toString(), book.getTitle(), startingSectionId, STARTING_HEALTH);
+        Long sessionId = idSequence.getAndIncrement();
+        GameSession session = new GameSession(sessionId, book.getId(), book.getTitle(), startingSectionId, STARTING_HEALTH);
         sessions.put(session.getId(), session);
         session.addHistory(startingSectionId);
         return session;
     }
 
-    public Optional<GameSession> getSession(String sessionId) {
+    public Optional<GameSession> getSession(Long sessionId) {
         return Optional.ofNullable(sessions.get(sessionId));
     }
 
-    public GameSession saveSession(String sessionId) {
+    public GameSession saveSession(Long sessionId) {
         GameSession session = sessions.get(sessionId);
         if (session == null) {
             throw new IllegalArgumentException("Session does not exist: " + sessionId);
@@ -50,7 +52,7 @@ public class GameSessionService {
         return session;
     }
 
-    public GameSession updateHealth(String sessionId, int delta) {
+    public GameSession updateHealth(Long sessionId, int delta) {
         GameSession session = sessions.get(sessionId);
         if (session == null) {
             throw new IllegalArgumentException("Session does not exist: " + sessionId);
@@ -63,7 +65,7 @@ public class GameSessionService {
         return session;
     }
 
-    public GameSession chooseOption(String sessionId, Book book, int optionIndex) {
+    public GameSession chooseOption(Long sessionId, Book book, int optionIndex) {
         GameSession session = sessions.get(sessionId);
         if (session == null) {
             throw new IllegalArgumentException("Session does not exist: " + sessionId);

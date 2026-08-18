@@ -9,9 +9,11 @@ import java.util.Optional;
 public interface BookRepository {
     void saveAll(List<Book> books);
 
+    Book save(Book book);
+
     List<Book> findAll();
 
-    Optional<Book> findById(String id);
+    Optional<Book> findById(Long id);
 
     List<Book> findByDifficulty(Difficulty difficulty);
 

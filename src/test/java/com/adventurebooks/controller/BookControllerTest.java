@@ -41,15 +41,15 @@ class BookControllerTest {
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
-        assertEquals("Forest", response.getBody().getFirst().getId());
+        assertNull(response.getBody().getFirst().getId()); // no id set on transient book
         assertEquals(DifficultyDto.EASY, response.getBody().getFirst().getDifficulty());
     }
 
     @Test
     void getBookByIdThrows404WhenMissing() {
-        when(bookService.getBookById("missing")).thenReturn(Optional.empty());
+        when(bookService.getBookById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> controller.getBookById("missing"));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> controller.getBookById(99L));
 
         assertEquals(404, exception.getStatusCode().value());
     }
@@ -57,10 +57,11 @@ class BookControllerTest {
     @Test
     void validateBookReturnsMappedResult() {
         Book book = new Book("Forest", "Ana", com.adventurebooks.model.enums.Difficulty.EASY, List.of());
-        when(bookService.getBookById("Forest")).thenReturn(Optional.of(book));
+        book.setId(1L);
+        when(bookService.getBookById(1L)).thenReturn(Optional.of(book));
         when(bookService.validateBook(book)).thenReturn(new BookValidationResult(false, List.of("invalid")));
 
-        ResponseEntity<com.adventurebooks.generated.model.BookValidationResultDto> response = controller.validateBook("Forest");
+        ResponseEntity<com.adventurebooks.generated.model.BookValidationResultDto> response = controller.validateBook(1L);
 
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());

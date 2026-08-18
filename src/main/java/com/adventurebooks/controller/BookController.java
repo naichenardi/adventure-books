@@ -12,6 +12,7 @@ import com.adventurebooks.validation.BookValidationResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
@@ -53,13 +54,13 @@ public class BookController implements BookApi {
     }
 
     @Override
-    public ResponseEntity<BookDto> getBookById(String id) {
+    public ResponseEntity<BookDto> getBookById(Long id) {
         Book book = findBookOrThrow(id);
         return ResponseEntity.ok(toApiBook(book));
     }
 
     @Override
-    public ResponseEntity<BookValidationResultDto> validateBook(String id) {
+    public ResponseEntity<BookValidationResultDto> validateBook(Long id) {
         Book book = findBookOrThrow(id);
         BookValidationResult result = bookService.validateBook(book);
         BookValidationResultDto payload = new BookValidationResultDto(result.valid());
@@ -67,14 +68,20 @@ public class BookController implements BookApi {
         return ResponseEntity.ok(payload);
     }
 
-    private Book findBookOrThrow(String id) {
+    @Override
+    public ResponseEntity<BookDto> uploadBook(MultipartFile file) {
+        Book book = bookService.uploadBook(file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toApiBook(book));
+    }
+
+    private Book findBookOrThrow(Long id) {
         return bookService.getBookById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found: " + id));
     }
 
     private BookDto toApiBook(com.adventurebooks.model.entity.Book domainBook) {
         BookDto apiBook = new BookDto(domainBook.getTitle());
-        apiBook.setId(domainBook.getTitle());
+        apiBook.setId(domainBook.getId() != null ? domainBook.getId().intValue() : null);
         apiBook.setAuthor(domainBook.getAuthor());
 
         if (domainBook.getDifficulty() != null) {

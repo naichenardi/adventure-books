@@ -51,6 +51,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/books/upload:
+    post:
+      tags:
+        - Book
+      summary: Upload a book from a JSON file
+      operationId: uploadBook
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/books/{id}:
     get:
       tags:
@@ -63,6 +100,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           example: 1
       responses:
         '200':
@@ -95,6 +133,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           example: 1
       responses:
         '200':
@@ -158,6 +197,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           example: 42
       responses:
         '200':
@@ -190,6 +230,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           example: 42
       requestBody:
         required: true
@@ -234,6 +275,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           example: 42
       responses:
         '200':
@@ -297,7 +339,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
         text:
           type: string
         type:
@@ -322,7 +364,7 @@ components:
         description:
           type: string
         gotoId:
-          type: integer
+          type: string
         consequence:
           $ref: '#/components/schemas/Consequence'
       required:
@@ -360,6 +402,7 @@ components:
       properties:
         bookId:
           type: integer
+          format: int64
           example: 1
       required:
         - bookId
@@ -376,10 +419,12 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         bookId:
           type: integer
+          format: int64
         currentSectionId:
-          type: integer
+          type: string
         health:
           type: integer
         finished:

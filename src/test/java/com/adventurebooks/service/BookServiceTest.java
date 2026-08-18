@@ -18,9 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
@@ -63,7 +61,7 @@ class BookServiceTest {
     void delegatesBookQueriesToRepository() {
         Book book = new Book("The Crystal Caverns", "Evelyn Stormrider", Difficulty.EASY, List.of());
         when(repository.findAll()).thenReturn(List.of(book));
-        when(repository.findById("The Crystal Caverns")).thenReturn(Optional.of(book));
+        when(repository.findById(1L)).thenReturn(Optional.of(book));
         when(repository.findByDifficulty(Difficulty.HARD)).thenReturn(List.of(
                 new Book("Dragon Quest", "Anya Stone", Difficulty.HARD, List.of())
         ));
@@ -72,7 +70,7 @@ class BookServiceTest {
         ));
 
         assertEquals(1, service.getAllBooks().size());
-        assertTrue(service.getBookById("The Crystal Caverns").isPresent());
+        assertTrue(service.getBookById(1L).isPresent());
         assertEquals(1, service.filterBooksByDifficulty(Difficulty.HARD).size());
         assertEquals(1, service.searchBooks("pirate").size());
     }

@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class InMemoryBookRepository implements BookRepository {
 
-    private final Map<String, Book> booksById = new ConcurrentHashMap<>();
+    private final Map<Long, Book> booksById = new ConcurrentHashMap<>();
+    private final AtomicLong idSequence = new AtomicLong(1);
 
     @Override
     public void saveAll(List<Book> books) {
@@ -22,9 +24,19 @@ public class InMemoryBookRepository implements BookRepository {
 
         for (Book book : books) {
             if (book != null && book.getTitle() != null) {
-                booksById.put(book.getTitle(), book);
+                book.setId(idSequence.getAndIncrement());
+                booksById.put(book.getId(), book);
             }
         }
+    }
+
+    @Override
+    public Book save(Book book) {
+        if (book.getId() == null) {
+            book.setId(idSequence.getAndIncrement());
+        }
+        booksById.put(book.getId(), book);
+        return book;
     }
 
     @Override
@@ -34,7 +46,7 @@ public class InMemoryBookRepository implements BookRepository {
     }
 
     @Override
-    public Optional<Book> findById(String id) {
+    public Optional<Book> findById(Long id) {
         return Optional.ofNullable(booksById.get(id));
     }
 

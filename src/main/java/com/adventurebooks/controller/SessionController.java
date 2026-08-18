@@ -26,47 +26,45 @@ public class SessionController implements SessionApi {
 
     @Override
     public ResponseEntity<GameSessionDto> startSession(StartSessionRequestDto startSessionRequest) {
-        if (startSessionRequest == null || startSessionRequest.getBookId() == null || startSessionRequest.getBookId().isBlank()) {
+        if (startSessionRequest == null || startSessionRequest.getBookId() == null) {
             throw new IllegalArgumentException("bookId is required.");
         }
 
-        com.adventurebooks.model.entity.Book book = findBookOrThrow(startSessionRequest.getBookId());
+        Long bookId = startSessionRequest.getBookId();
+        com.adventurebooks.model.entity.Book book = bookService.getBookById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found: " + bookId));
         com.adventurebooks.model.entity.GameSession session = gameSessionService.startNewSession(book);
         return ResponseEntity.status(HttpStatus.CREATED).body(toApiSession(session));
     }
 
     @Override
-    public ResponseEntity<GameSessionDto> getSessionById(String id) {
+    public ResponseEntity<GameSessionDto> getSessionById(Long id) {
         com.adventurebooks.model.entity.GameSession session = findSessionOrThrow(id);
         return ResponseEntity.ok(toApiSession(session));
     }
 
     @Override
-    public ResponseEntity<GameSessionDto> saveSession(String id) {
+    public ResponseEntity<GameSessionDto> saveSession(Long id) {
         findSessionOrThrow(id);
         com.adventurebooks.model.entity.GameSession session = gameSessionService.saveSession(id);
         return ResponseEntity.ok(toApiSession(session));
     }
 
     @Override
-    public ResponseEntity<GameSessionDto> chooseOption(String id, ChooseRequestDto chooseRequest) {
+    public ResponseEntity<GameSessionDto> chooseOption(Long id, ChooseRequestDto chooseRequest) {
         if (chooseRequest == null || chooseRequest.getOptionIndex() == null) {
             throw new IllegalArgumentException("optionIndex is required.");
         }
 
         com.adventurebooks.model.entity.GameSession session = findSessionOrThrow(id);
-        com.adventurebooks.model.entity.Book book = findBookOrThrow(session.getBookTitle());
+        com.adventurebooks.model.entity.Book book = bookService.getBookById(session.getBookId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found: " + session.getBookId()));
         com.adventurebooks.model.entity.GameSession updatedSession =
                 gameSessionService.chooseOption(id, book, chooseRequest.getOptionIndex());
         return ResponseEntity.ok(toApiSession(updatedSession));
     }
 
-    private com.adventurebooks.model.entity.Book findBookOrThrow(String id) {
-        return bookService.getBookById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found: " + id));
-    }
-
-    private com.adventurebooks.model.entity.GameSession findSessionOrThrow(String id) {
+    private com.adventurebooks.model.entity.GameSession findSessionOrThrow(Long id) {
         return gameSessionService.getSession(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found: " + id));
     }
@@ -74,7 +72,7 @@ public class SessionController implements SessionApi {
     private GameSessionDto toApiSession(com.adventurebooks.model.entity.GameSession session) {
         GameSessionDto payload = new GameSessionDto();
         payload.setId(session.getId());
-        payload.setBookId(session.getBookTitle());
+        payload.setBookId(session.getBookId());
         payload.setCurrentSectionId(session.getCurrentSectionId());
         payload.setHealth(session.getHealth());
         payload.setSaved(session.isSaved());
