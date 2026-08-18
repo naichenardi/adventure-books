@@ -48,7 +48,7 @@ class GameSessionServiceTest {
 
         assertEquals(7, service.getSession(session.getId()).orElseThrow().getHealth());
         assertTrue(saved.isSaved());
-        assertFalse(saved.isActive());
+        assertTrue(saved.isActive());
     }
 
     @Test

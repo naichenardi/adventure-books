@@ -48,7 +48,6 @@ public class GameSessionService {
         }
 
         session.setSaved(true);
-        session.setActive(false);
         return session;
     }
 
