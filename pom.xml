@@ -110,7 +110,8 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/openapi/openapi.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/adventure-books-v1-spec.yaml
+                            </inputSpec>
                             <generatorName>spring</generatorName>
                             <library>spring-boot</library>
                             <apiPackage>com.adventurebooks.generated.api</apiPackage>
@@ -191,7 +192,7 @@
                                         <limit>
                                             <counter>CLASS</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.60</minimum>
+                                            <minimum>0.80</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

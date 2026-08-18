@@ -2,7 +2,13 @@ package com.adventurebooks.controller;
 
 import com.adventurebooks.generated.api.BookApi;
 import com.adventurebooks.generated.model.*;
+import com.adventurebooks.model.entity.Book;
+import com.adventurebooks.model.entity.Consequence;
+import com.adventurebooks.model.entity.Option;
+import com.adventurebooks.model.entity.Section;
+import com.adventurebooks.model.enums.Difficulty;
 import com.adventurebooks.service.BookService;
+import com.adventurebooks.validation.BookValidationResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,7 +29,7 @@ public class BookController implements BookApi {
 
     @Override
     public ResponseEntity<List<BookDto>> listBooks(String query, DifficultyDto difficulty) {
-        List<com.adventurebooks.model.entity.Book> books;
+        List<Book> books;
         if (query != null && !query.isBlank()) {
             books = bookService.searchBooks(query);
         } else {
@@ -31,8 +37,8 @@ public class BookController implements BookApi {
         }
 
         if (difficulty != null) {
-            com.adventurebooks.model.enums.Difficulty domainDifficulty =
-                    com.adventurebooks.model.enums.Difficulty.valueOf(difficulty.getValue());
+            Difficulty domainDifficulty =
+                    Difficulty.valueOf(difficulty.getValue());
             books = books.stream()
                     .filter(book -> book.getDifficulty() == domainDifficulty)
                     .collect(Collectors.toList());
@@ -46,20 +52,20 @@ public class BookController implements BookApi {
 
     @Override
     public ResponseEntity<BookDto> getBookById(String id) {
-        com.adventurebooks.model.entity.Book book = findBookOrThrow(id);
+        Book book = findBookOrThrow(id);
         return ResponseEntity.ok(toApiBook(book));
     }
 
     @Override
     public ResponseEntity<BookValidationResultDto> validateBook(String id) {
-        com.adventurebooks.model.entity.Book book = findBookOrThrow(id);
-        com.adventurebooks.validation.BookValidationResult result = bookService.validateBook(book);
+        Book book = findBookOrThrow(id);
+        BookValidationResult result = bookService.validateBook(book);
         BookValidationResultDto payload = new BookValidationResultDto(result.valid());
         payload.setErrors(result.errors());
         return ResponseEntity.ok(payload);
     }
 
-    private com.adventurebooks.model.entity.Book findBookOrThrow(String id) {
+    private Book findBookOrThrow(String id) {
         return bookService.getBookById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found: " + id));
     }
@@ -81,7 +87,7 @@ public class BookController implements BookApi {
         return apiBook;
     }
 
-    private SectionDto toApiSection(com.adventurebooks.model.entity.Section domainSection) {
+    private SectionDto toApiSection(Section domainSection) {
         SectionDto apiSection = new SectionDto(
                 domainSection.getId(),
                 domainSection.getText(),
@@ -96,13 +102,13 @@ public class BookController implements BookApi {
         return apiSection;
     }
 
-    private OptionDto toApiOption(com.adventurebooks.model.entity.Option domainOption) {
+    private OptionDto toApiOption(Option domainOption) {
         OptionDto apiOption = new OptionDto(domainOption.getDescription(), domainOption.getGotoId());
         apiOption.setConsequence(toApiConsequence(domainOption.getConsequence()));
         return apiOption;
     }
 
-    private ConsequenceDto toApiConsequence(com.adventurebooks.model.entity.Consequence domainConsequence) {
+    private ConsequenceDto toApiConsequence(Consequence domainConsequence) {
         if (domainConsequence == null || domainConsequence.getType() == null) {
             return null;
         }
