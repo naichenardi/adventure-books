@@ -12,7 +12,7 @@ An interactive adventure book application built with **Angular** (frontend) and 
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
-- [API Overview-TBD]()
+- [API Overview](#api-overview)
 - [Development Notes](#development-notes)
 
 ---
@@ -60,14 +60,17 @@ A book is considered **invalid** if any of the following conditions are met:
 ## Tech Stack
 
 ### Backend
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| Java | 21 | Language (records used for DTOs & value types) |
-| Spring Boot | 4.1.0 | Application framework |
-| Spring Web | — | REST API |
-| Spring Data JPA | — | Data persistence |
-| H2 Database | — | In-memory database (dev) |
-| Bean Validation | — | Input validation |
+| Technology        | Version | Purpose                                         |
+|-------------------|---------|-------------------------------------------------|
+| Java              | 21      | Language                                        |
+| Spring Boot       | 4.1.0   | Application framework                           |
+| Spring Web        | —       | REST API                                        |
+| Spring Data JPA   | —       | Data persistence                                |
+| H2 Database       | —       | In-memory database (dev)                        |
+| OpenAPI Generator | 7.0.0   | Contract-first API model & interface generation |
+| Bean Validation   | —       | Input validation                                |
+
+---
 
 ## Project Structure
 
@@ -76,27 +79,28 @@ adventure-books/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/adventurebooks/
-│   │   │   ├── AdventureBooksApplication.
-│   │   │   ├── config/
-│   │   │   ├── controller/
-│   │   │   ├── service/
-│   │   │   ├── repository/
+│   │   │   ├── AdventureBooksApplication.java
+│   │   │   ├── controller/         # REST controllers (BookController, SessionController)
+│   │   │   ├── service/            # Business logic (BookService, GameSessionService, BookLoaderService)
+│   │   │   ├── repository/         # In-memory repository
 │   │   │   ├── model/
-│   │   │   │   ├── entity/
-│   │   │   │   ├── dto/
-│   │   │   │   └── enums/
-│   │   │   ├── validation/
-│   │   │   └── exception/
+│   │   │   │   ├── entity/         # Domain entities (Book, Section, Option, Consequence, GameSession)
+│   │   │   │   └── enums/          # SectionType, ConsequenceType, Difficulty
+│   │   │   ├── validation/         # BookValidationService + BookValidationResult
+│   │   │   └── exception/          # GlobalExceptionHandler + ErrorResponse
+│   │   ├── openapi/
+│   │   │   └── openapi.yaml        # OpenAPI contract (source of truth for generated code)
 │   │   └── resources/
 │   │       └── application.yaml
 │   └── test/
 │       ├── java/
 │       └── resources/
-│           └── books/
-│               ├── dragon-quest.json
+│           └── books/              # Sample book JSON fixtures
+│               ├── dragon-quest.json        (intentionally empty — tested as empty-file case)
 │               ├── crystal-caverns.json
 │               ├── pirates-jade-sea.json
 │               └── the-prisoner.json
+├── target/generated-sources/openapi/  # Auto-generated from openapi.yaml (do not edit)
 ├── pom.xml
 └── README.md
 ```
@@ -137,33 +141,58 @@ http://localhost:8080/h2-console
 ```bash
 ./mvnw test
 ```
+
+### Run tests with coverage
+
+```bash
+./mvnw verify
+```
+
 ---
 
 ## API Overview
 
-> Full API documentation will be expanded as each feature is implemented.
+The API is defined contract-first in [
+`src/main/resources/openapi/adventure-books-v1-spec.yaml`](src/main/resources/openapi/adventure-books-v1-spec.yaml).  
+Interfaces and model classes are generated automatically during the build under `com.adventurebooks.generated`.
 
 ### Books
 
-| Method | Endpoint                   | Description                                              |
-|--------|----------------------------|----------------------------------------------------------|
-| `GET`  | `/api/books`               | List all books (supports search & filter and pagination) |
-| `GET`  | `/api/books/{id}`          | Get a single book by id                                  |
-| `GET`  | `/api/books/{id}/validate` | Validate book against game rules                         |
+| Method | Endpoint                   | Description                                                      |
+|--------|----------------------------|------------------------------------------------------------------|
+| `GET`  | `/api/books`               | List all books (supports `query` and `difficulty` filter params) |
+| `GET`  | `/api/books/{id}`          | Get a single book by id                                          |
+| `GET`  | `/api/books/{id}/validate` | Validate book against game rules                                 |
 
-### Game Sessions *(coming soon)*
+### Game Sessions
 
-| Method | Endpoint                    | Description               |
-|--------|-----------------------------|---------------------------|
-| `POST` | `/api/sessions`             | Start a new game session  |
-| `GET`  | `/api/sessions/{id}`        | Get current session state |
-| `POST` | `/api/sessions/{id}/choose` | Make a section choice     |
-| `POST` | `/api/sessions/{id}/save`   | Save / pause a session    |
+| Method | Endpoint                    | Description                                      |
+|--------|-----------------------------|--------------------------------------------------|
+| `POST` | `/api/sessions`             | Start a new game session (`{ "bookId": "..." }`) |
+| `GET`  | `/api/sessions/{id}`        | Get current session state                        |
+| `POST` | `/api/sessions/{id}/choose` | Make a section choice (`{ "optionIndex": 0 }`)   |
+| `POST` | `/api/sessions/{id}/save`   | Save / pause a session                           |
+
+### Error responses
+
+All errors follow a consistent shape:
+
+```json
+{
+  "timestamp": "2026-08-18T00:00:00Z",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Book not found: xyz",
+  "path": "/api/books/xyz"
+}
+```
 
 ---
----
+
 ## Development Notes
 
 - Book JSON files placed in `src/test/resources/books/` are loaded automatically on startup (configurable via `adventure-books.books-path` in `application.yaml`).
-- Section `id` fields in JSON may be integers **or** strings — both are supported during deserialization.
+- `dragon-quest.json` is intentionally empty and is used to test empty-file handling.
+- API interfaces (`BookApi`, `SessionApi`) and model classes (`BookDto`, `SectionDto`, etc.) are **generated** from
+  `adventure-books-v1-spec.yaml` — do not edit files under `target/generated-sources/`.
 - The H2 database uses `create-drop` DDL mode, so data is reset on each restart. A persistent database can be configured by changing `spring.datasource.url` and `spring.jpa.hibernate.ddl-auto`.
