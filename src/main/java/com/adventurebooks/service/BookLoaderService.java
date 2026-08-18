@@ -11,6 +11,8 @@ import com.adventurebooks.model.entity.Section;
 import com.adventurebooks.model.enums.ConsequenceType;
 import com.adventurebooks.model.enums.Difficulty;
 import com.adventurebooks.model.enums.SectionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -24,6 +26,7 @@ import java.util.List;
 @Service
 public class BookLoaderService {
 
+    private static final Logger log = LoggerFactory.getLogger(BookLoaderService.class);
     private final ObjectMapper objectMapper;
     private final String booksPath;
     private final ResourcePatternResolver resourcePatternResolver;
@@ -45,7 +48,10 @@ public class BookLoaderService {
 
             for (Resource resource : resources) {
                 if (resource != null && resource.exists()) {
-                    books.add(loadBook(resource));
+                    Book book = loadBook(resource);
+                    if (book != null) {
+                        books.add(book);
+                    }
                 }
             }
 
@@ -61,12 +67,14 @@ public class BookLoaderService {
             String json = new String(content, StandardCharsets.UTF_8);
             String normalizedJson = json.replace("\uFEFF", "").trim();
             if (normalizedJson.isEmpty()) {
-                throw new IllegalStateException("Book resource is empty: " + resource.getFilename());
+                log.warn("X => Book resource is empty: {}", resource.getFilename());
+                return null;
             }
 
             BookDto bookDto;
             try {
                 bookDto = objectMapper.readValue(content, BookDto.class);
+                log.info("=> Book loaded: {}", resource.getFilename());
             } catch (Exception exception) {
                 throw new IllegalStateException("Invalid JSON format in book resource: " + resource.getFilename(), exception);
             }

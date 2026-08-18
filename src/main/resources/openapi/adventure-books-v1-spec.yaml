@@ -18,10 +18,12 @@ paths:
           in: query
           schema:
             type: string
+          example: pirate
         - name: difficulty
           in: query
           schema:
             $ref: '#/components/schemas/Difficulty'
+          example: MEDIUM
       responses:
         '200':
           description: OK
@@ -33,6 +35,12 @@ paths:
                   $ref: '#/components/schemas/Book'
         '400':
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
@@ -54,7 +62,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+          example: 1
       responses:
         '200':
           description: OK
@@ -85,7 +94,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+          example: 1
       responses:
         '200':
           description: Validation result
@@ -147,7 +157,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+          example: 42
       responses:
         '200':
           description: OK
@@ -178,7 +189,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+          example: 42
       requestBody:
         required: true
         content:
@@ -221,7 +233,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+          example: 42
       responses:
         '200':
           description: Saved
@@ -267,7 +280,7 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
         title:
           type: string
         author:
@@ -284,7 +297,7 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
         text:
           type: string
         type:
@@ -309,7 +322,7 @@ components:
         description:
           type: string
         gotoId:
-          type: string
+          type: integer
         consequence:
           $ref: '#/components/schemas/Consequence'
       required:
@@ -346,7 +359,8 @@ components:
       type: object
       properties:
         bookId:
-          type: string
+          type: integer
+          example: 1
       required:
         - bookId
     ChooseRequest:
@@ -354,17 +368,18 @@ components:
       properties:
         optionIndex:
           type: integer
+          example: 0
       required:
         - optionIndex
     GameSession:
       type: object
       properties:
         id:
-          type: string
+          type: integer
         bookId:
-          type: string
+          type: integer
         currentSectionId:
-          type: string
+          type: integer
         health:
           type: integer
         finished:

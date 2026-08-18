@@ -43,7 +43,9 @@ public class BookController implements BookApi {
                     .filter(book -> book.getDifficulty() == domainDifficulty)
                     .collect(Collectors.toList());
         }
-
+        if (books.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         List<BookDto> payload = books.stream()
                 .map(this::toApiBook)
                 .collect(Collectors.toList());

@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
             ResponseStatusException exception,
             HttpServletRequest request
     ) {
-        return buildResponse(exception.getStatusCode(), exception, request);
+        return buildResponse(exception.getStatusCode(), exception.getReason(), request);
     }
 
     @ExceptionHandler(Exception.class)
@@ -47,20 +47,29 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<ErrorResponse> buildResponse(
             HttpStatusCode status,
-            Exception exception,
+            String message,
             HttpServletRequest request) {
-        return buildResponse(HttpStatus.valueOf(status.value()), exception, request);
+        return buildResponse(HttpStatus.valueOf(status.value()), message, request);
     }
+
     private ResponseEntity<ErrorResponse> buildResponse(
             HttpStatus status,
             Exception exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(status, exception.getLocalizedMessage(), request);
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponse(
+            HttpStatus status,
+            String message,
             HttpServletRequest request
     ) {
         ErrorResponse response = new ErrorResponse(
                 Instant.now(),
                 status.value(),
                 status.getReasonPhrase(),
-                exception.getMessage(),
+                message,
                 request.getRequestURI()
         );
         return ResponseEntity.status(status).body(response);
