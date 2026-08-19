@@ -1,0 +1,52 @@
+<app-hero-banner
+  title="Adventure Awaits"
+  subtitle="Embark on epic quests where every choice shapes your destiny. Explore mystical realms, solve ancient mysteries, and become the hero of your own story."
+  [stat]="availableCount() + ' Epic Adventures Available'"
+/>
+
+<main class="library-page">
+  <section class="library-page__intro">
+    <h2>&#128218; The Adventure Library</h2>
+    <p>
+      Choose your next adventure from our collection of interactive tales. Each book offers
+      unique paths and multiple endings based on your choices.
+    </p>
+  </section>
+
+  <section class="library-page__tools">
+    <label class="search-field" for="book-search">
+      <span aria-hidden="true">&#128269;</span>
+      <input
+        id="book-search"
+        type="search"
+        placeholder="Search adventures..."
+        [value]="query()"
+        (input)="query.set($any($event.target).value)"
+      />
+    </label>
+
+    <app-filter-bar
+      [filters]="filters"
+      [selected]="filterLabel(selectedFilter())"
+      (selectedChange)="selectFilter($event)"
+    />
+  </section>
+
+  @if (loading()) {
+    <p class="library-page__status">Loading adventures...</p>
+  } @else if (errorMessage()) {
+    <p class="library-page__status library-page__status--error">{{ errorMessage() }}</p>
+  } @else if (books().length === 0) {
+    <p class="library-page__status">No adventures found for this filter.</p>
+  } @else {
+    <section class="library-page__grid">
+      @for (book of books(); track book.id || book.title) {
+        <app-book-card
+          [book]="book"
+          [opening]="openingBookId() === book.id"
+          (openBook)="openBook(book)"
+        />
+      }
+    </section>
+  }
+</main>
