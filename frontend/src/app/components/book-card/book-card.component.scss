@@ -1,0 +1,88 @@
+.book-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  border: 1px solid #ebdfcf;
+  border-radius: 14px;
+  background: #fffdfa;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 8px 22px rgb(79 43 8 / 6%);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  cursor: pointer;
+}
+
+.book-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 13px 26px rgb(79 43 8 / 10%);
+}
+
+.book-card h3 {
+  margin: 0;
+  color: #3e2a1f;
+  font-size: 1.9rem;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+}
+
+.book-card__author {
+  margin: 0;
+  color: #7f6752;
+}
+
+.book-card__summary {
+  margin: 0.1rem 0 0;
+  color: #5a483a;
+  line-height: 1.45;
+  min-height: 6.8em;
+}
+
+.book-card__difficulty {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.24rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.book-card__difficulty.easy {
+  background: #d9f6d9;
+  color: #14602d;
+}
+
+.book-card__difficulty.medium {
+  background: #fff0c8;
+  color: #795604;
+}
+
+.book-card__difficulty.hard {
+  background: #ffd7d0;
+  color: #7a2215;
+}
+
+.book-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  color: #695542;
+  font-size: 0.92rem;
+}
+
+.book-card__cta {
+  margin-top: auto;
+  border-radius: 8px;
+  text-align: center;
+  padding: 0.57rem 0.75rem;
+  background: linear-gradient(90deg, #ac6f16, #efbe50);
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.book-card.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.book-card.is-disabled:hover {
+  transform: none;
+  box-shadow: 0 8px 22px rgb(79 43 8 / 6%);
+}

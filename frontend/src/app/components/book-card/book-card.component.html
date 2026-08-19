@@ -1,0 +1,24 @@
+<article
+  class="book-card"
+  role="button"
+  tabindex="0"
+  [class.is-disabled]="opening() || !book().id"
+  (click)="handleOpen()"
+  (keydown.enter)="handleOpen()"
+  (keydown.space)="handleOpen(); $event.preventDefault()"
+>
+  <h3>{{ book().title }}</h3>
+  <p class="book-card__author">by {{ book().author || 'Unknown Author' }}</p>
+  <p class="book-card__summary">{{ summaryText(book()) }}</p>
+
+  <div class="book-card__difficulty" [class.easy]="book().difficulty === 'EASY'" [class.medium]="book().difficulty === 'MEDIUM'" [class.hard]="book().difficulty === 'HARD'">
+    {{ difficultyLabel[book().difficulty || ''] || 'Unknown' }}
+  </div>
+
+  <div class="book-card__meta">
+    <span>&#128214; {{ book().sections?.length || 0 }} sections</span>
+    <span>&#127937; {{ endingCount(book()) }} endings</span>
+  </div>
+
+  <p class="book-card__cta">{{ opening() ? 'Opening...' : 'Begin Quest' }}</p>
+</article>

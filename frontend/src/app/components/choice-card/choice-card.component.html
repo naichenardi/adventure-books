@@ -1,0 +1,12 @@
+<button class="choice-card" type="button" [disabled]="disabled()" (click)="choose.emit(index())">
+  <div class="choice-card__title-row">
+    <span class="choice-card__index">{{ index() + 1 }}</span>
+    <h3>{{ option().description }}</h3>
+  </div>
+  @if (option().consequence?.text) {
+    <p>{{ option().consequence?.text }}</p>
+  }
+  @if (option().consequence?.value) {
+    <strong>Effect: {{ option().consequence?.value }}</strong>
+  }
+</button>

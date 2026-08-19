@@ -1,0 +1,8 @@
+<div class="filter-bar">
+  <span class="filter-bar__label">Filters:</span>
+  @for (filter of filters(); track filter) {
+    <button type="button" [class.is-selected]="selected() === filter" (click)="selectedChange.emit(filter)">
+      {{ filter }}
+    </button>
+  }
+</div>

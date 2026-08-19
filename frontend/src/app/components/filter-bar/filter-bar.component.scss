@@ -1,0 +1,29 @@
+.filter-bar {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-bar__label {
+  font-size: 0.88rem;
+  color: #7f6651;
+  margin-right: 0.3rem;
+}
+
+button {
+  border: 1px solid #eadbca;
+  border-radius: 999px;
+  background: #f7f0e7;
+  color: #5d4a3a;
+  font-weight: 600;
+  font-size: 0.76rem;
+  padding: 0.24rem 0.62rem;
+  cursor: pointer;
+}
+
+button.is-selected {
+  border-color: #c58725;
+  background: #e4a93f;
+  color: #fff;
+}
