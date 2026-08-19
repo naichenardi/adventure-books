@@ -1,0 +1,226 @@
+{
+  "title": "The Clockwork Citadel",
+  "author": "Nia Emberlynn",
+  "difficulty": "MEDIUM",
+  "sections": [
+    {
+      "id": "1",
+      "text": "A sudden storm forces your airship down onto the deck of a floating citadel run by brass automatons. Gears click and hiss all around you as the fog clears.",
+      "type": "BEGIN",
+      "options": [
+        {
+          "description": "Sneak into the maintenance tunnels",
+          "gotoId": "2"
+        },
+        {
+          "description": "Approach the main gate and announce yourself",
+          "gotoId": "3"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "text": "The tunnels rattle with steam pipes. A gear-golem guard blocks the passage, its core glowing faintly through a chest panel.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Disable the golem's core gently",
+          "gotoId": "4"
+        },
+        {
+          "description": "Rip out the core forcefully",
+          "gotoId": "5",
+          "consequence": {
+            "type": "LOSE_HEALTH",
+            "value": "4",
+            "text": "The golem's arm slices your shoulder as it powers down."
+          }
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "text": "Two automaton guards block the gate, demanding a Citadel Seal you do not have.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Bluff that you're an Imperial inspector",
+          "gotoId": "6"
+        },
+        {
+          "description": "Fight your way past",
+          "gotoId": "7",
+          "consequence": {
+            "type": "LOSE_HEALTH",
+            "value": "6",
+            "text": "The guards' steam lances scorch your side as you barrel through."
+          }
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "text": "The golem powers down peacefully, its final gesture pointing you toward a hidden passage leading to the Cogwork Archive.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Follow the passage into the Archive",
+          "gotoId": "8"
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "text": "The golem slumps, but the wrenched core sets off a citadel-wide alarm. Klaxons echo through the tunnels.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Run deeper into the tunnels",
+          "gotoId": "9",
+          "consequence": {
+            "type": "LOSE_HEALTH",
+            "value": "3",
+            "text": "You bark your shin on a pipe joint as you sprint through the dark."
+          }
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "text": "The bluff works. A guard escorts you inside, muttering about overdue inspections.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Slip away from your escort toward the Archive",
+          "gotoId": "8"
+        },
+        {
+          "description": "Play along and ask about the Citadel's Heart",
+          "gotoId": "10"
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "text": "You break through the gate, wounded but inside. Alarms are already blaring across the citadel.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Flee into the maintenance tunnels",
+          "gotoId": "9"
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "text": "The Cogwork Archive is lined with schematics. They reveal the citadel is powered by a storm spirit, chained to a great brass engine.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Free the storm spirit from the engine",
+          "gotoId": "11"
+        },
+        {
+          "description": "Take the schematics and leave quietly",
+          "gotoId": "12"
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "text": "Alarms chase you through the pipework until the tunnel opens back toward the Archive.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Push forward into the Archive",
+          "gotoId": "8",
+          "consequence": {
+            "type": "LOSE_HEALTH",
+            "value": "2",
+            "text": "A ruptured steam vent scalds your hands as you scramble past."
+          }
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "text": "Your escort mentions the Heart chamber deep below, then eyes you with sudden suspicion.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Ask to see the Heart chamber",
+          "gotoId": "13"
+        },
+        {
+          "description": "Excuse yourself and slip toward the Archive",
+          "gotoId": "8"
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "text": "You wrench the chains free. The storm spirit rises in a blaze of light and lightning, and the citadel begins to shudder apart.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Ride the storm spirit to freedom",
+          "gotoId": "14"
+        },
+        {
+          "description": "Try to calm the spirit and negotiate",
+          "gotoId": "15",
+          "consequence": {
+            "type": "GAIN_HEALTH",
+            "value": "5",
+            "text": "The spirit's calming aura washes over you, mending your wounds."
+          }
+        }
+      ]
+    },
+    {
+      "id": "12",
+      "text": "You slip away with the schematics, the citadel none the wiser. Scholars below will pay handsomely for this knowledge.",
+      "type": "END"
+    },
+    {
+      "id": "13",
+      "text": "The suspicion turns to alarm. Guards close in around you at the threshold of the Heart chamber.",
+      "type": "NODE",
+      "options": [
+        {
+          "description": "Surrender peacefully",
+          "gotoId": "16"
+        },
+        {
+          "description": "Make a desperate dash back to the airship",
+          "gotoId": "17",
+          "consequence": {
+            "type": "LOSE_HEALTH",
+            "value": "5",
+            "text": "A steam lance grazes your leg as you sprint for the docking ring."
+          }
+        }
+      ]
+    },
+    {
+      "id": "14",
+      "text": "Riding atop the freed storm spirit, you soar away as the Clockwork Citadel crumbles into the clouds behind you.",
+      "type": "END"
+    },
+    {
+      "id": "15",
+      "text": "Grateful for its freedom, the storm spirit gifts you a shard of its lightning-heart before dissolving into the open sky.",
+      "type": "END"
+    },
+    {
+      "id": "16",
+      "text": "Brass clamps close around your wrists. Your airship days are over — for now.",
+      "type": "END"
+    },
+    {
+      "id": "17",
+      "text": "Bleeding but free, you throw yourself aboard your airship as the citadel's alarms fade into the clouds below.",
+      "type": "END"
+    }
+  ]
+}
