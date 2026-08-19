@@ -3,21 +3,22 @@ package com.adventurebooks.service;
 import com.adventurebooks.model.entity.*;
 import com.adventurebooks.model.enums.ConsequenceType;
 import com.adventurebooks.model.enums.SectionType;
+import com.adventurebooks.repository.GameSessionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class GameSessionService {
 
     private static final int STARTING_HEALTH = 10;
 
-    private final Map<Long, GameSession> sessions = new ConcurrentHashMap<>();
-    private final AtomicLong idSequence = new AtomicLong(1);
+    private final GameSessionRepository gameSessionRepository;
+
+    public GameSessionService(GameSessionRepository gameSessionRepository) {
+        this.gameSessionRepository = gameSessionRepository;
+    }
 
     public GameSession startNewSession(Book book) {
         if (book == null || book.getSections() == null || book.getSections().isEmpty()) {
@@ -30,45 +31,37 @@ public class GameSessionService {
                 .map(Section::getId)
                 .orElseThrow(() -> new IllegalStateException("Book does not contain a valid beginning section."));
 
-        Long sessionId = idSequence.getAndIncrement();
-        GameSession session = new GameSession(sessionId, book.getId(), book.getTitle(), startingSectionId, STARTING_HEALTH);
-        sessions.put(session.getId(), session);
+        GameSession session = new GameSession(null, book.getId(), book.getTitle(), startingSectionId, STARTING_HEALTH);
         session.addHistory(startingSectionId);
-        return session;
+        return gameSessionRepository.save(session);
     }
 
     public Optional<GameSession> getSession(Long sessionId) {
-        return Optional.ofNullable(sessions.get(sessionId));
+        return gameSessionRepository.findById(sessionId);
     }
 
     public GameSession saveSession(Long sessionId) {
-        GameSession session = sessions.get(sessionId);
-        if (session == null) {
-            throw new IllegalArgumentException("Session does not exist: " + sessionId);
-        }
+        GameSession session = gameSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session does not exist: " + sessionId));
 
         session.setSaved(true);
-        return session;
+        return gameSessionRepository.save(session);
     }
 
     public GameSession updateHealth(Long sessionId, int delta) {
-        GameSession session = sessions.get(sessionId);
-        if (session == null) {
-            throw new IllegalArgumentException("Session does not exist: " + sessionId);
-        }
+        GameSession session = gameSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session does not exist: " + sessionId));
 
         session.setHealth(Math.max(0, session.getHealth() + delta));
         if (session.getHealth() == 0) {
             session.setActive(false);
         }
-        return session;
+        return gameSessionRepository.save(session);
     }
 
     public GameSession chooseOption(Long sessionId, Book book, int optionIndex) {
-        GameSession session = sessions.get(sessionId);
-        if (session == null) {
-            throw new IllegalArgumentException("Session does not exist: " + sessionId);
-        }
+        GameSession session = gameSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session does not exist: " + sessionId));
         if (!session.isActive()) {
             throw new IllegalStateException("Session is not active: " + sessionId);
         }
@@ -102,7 +95,7 @@ public class GameSessionService {
             session.setActive(false);
         }
 
-        return session;
+        return gameSessionRepository.save(session);
     }
 
     private Optional<Section> findSectionById(List<Section> sections, String sectionId) {

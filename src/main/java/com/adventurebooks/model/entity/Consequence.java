@@ -1,10 +1,22 @@
 package com.adventurebooks.model.entity;
 
 import com.adventurebooks.model.enums.ConsequenceType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
+@Embeddable
 public class Consequence {
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "consequence_type")
     private ConsequenceType type;
+
+    @Column(name = "consequence_value")
     private Integer value;
+
+    @Column(name = "consequence_text")
     private String text;
 
     public Consequence() {

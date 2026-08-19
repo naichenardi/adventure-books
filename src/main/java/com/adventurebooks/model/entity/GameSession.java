@@ -1,10 +1,25 @@
 package com.adventurebooks.model.entity;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Table;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "game_sessions")
 public class GameSession {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long bookId;
     private String bookTitle;
@@ -14,7 +29,12 @@ public class GameSession {
     private boolean saved;
     private Instant startedAt;
     private Instant updatedAt;
-    private final List<String> history = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "game_session_history", joinColumns = @JoinColumn(name = "session_id"))
+    @OrderColumn(name = "history_order")
+    @Column(name = "section_id")
+    private List<String> history = new ArrayList<>();
 
     public GameSession() {
     }

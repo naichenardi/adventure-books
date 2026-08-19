@@ -2,20 +2,17 @@ package com.adventurebooks.repository;
 
 import com.adventurebooks.model.entity.Book;
 import com.adventurebooks.model.enums.Difficulty;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface BookRepository {
-    void saveAll(List<Book> books);
+public interface BookRepository extends JpaRepository<Book, Long> {
 
-    Book save(Book book);
+    @Query("SELECT b FROM Book b WHERE :difficulty IS NULL OR b.difficulty = :difficulty")
+    List<Book> findByDifficulty(@Param("difficulty") Difficulty difficulty);
 
-    List<Book> findAll();
-
-    Optional<Book> findById(Long id);
-
-    List<Book> findByDifficulty(Difficulty difficulty);
-
-    List<Book> searchByTitle(String query);
+    @Query("SELECT b FROM Book b WHERE :query IS NULL OR :query = '' OR LOWER(b.title) LIKE LOWER(CONCAT('%', :query, '%'))")
+    List<Book> searchByTitle(@Param("query") String query);
 }

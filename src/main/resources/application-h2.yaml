@@ -1,0 +1,13 @@
+spring:
+  # In-memory H2 database, for running the app locally without Docker/PostgreSQL.
+  # Activate with: ./mvnw spring-boot:run -Dspring-boot.run.profiles=h2
+  datasource:
+    url: jdbc:h2:mem:adventurebooks;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
