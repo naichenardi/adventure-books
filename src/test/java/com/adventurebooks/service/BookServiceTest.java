@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -89,5 +90,31 @@ class BookServiceTest {
         assertTrue(actual.valid());
         assertSame(expected, actual);
         verify(validationService).validate(validBook);
+    }
+
+    @Test
+    void uploadBookSavesValidatedBook() {
+        Book book = new Book("Uploaded", "Author", Difficulty.EASY, List.of());
+        MockMultipartFile file = new MockMultipartFile("file", "uploaded.json", "application/json", "{}".getBytes());
+        when(loader.loadBook(any())).thenReturn(book);
+        when(validationService.validate(book)).thenReturn(new BookValidationResult(true, List.of()));
+        when(repository.save(book)).thenReturn(book);
+
+        Book saved = service.uploadBook(file);
+
+        assertSame(book, saved);
+        verify(repository).save(book);
+    }
+
+    @Test
+    void uploadBookPropagatesLoaderInputErrorsAsIs() {
+        MockMultipartFile file = new MockMultipartFile("file", "broken.json", "application/json", "{}".getBytes());
+        IllegalArgumentException loaderError = new IllegalArgumentException("Invalid consequence value 'abc': must be a whole number.");
+        when(loader.loadBook(any())).thenThrow(loaderError);
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> service.uploadBook(file));
+
+        assertSame(loaderError, thrown);
+        verify(repository, never()).save(any());
     }
 }

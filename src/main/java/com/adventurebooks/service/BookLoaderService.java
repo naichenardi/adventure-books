@@ -51,7 +51,7 @@ public class BookLoaderService {
                     try {
                         Book book = loadBook(resource);
                         books.add(book);
-                    } catch (IllegalStateException e) {
+                    } catch (IllegalStateException | IllegalArgumentException e) {
                         log.warn("X => Skipping book resource: {}", e.getMessage());
                     }
                 }
@@ -81,7 +81,10 @@ public class BookLoaderService {
             }
 
             return mapToBook(bookDto);
-        } catch (IllegalStateException exception) {
+        } catch (IllegalStateException | IllegalArgumentException exception) {
+            // Client-caused problems (bad enum values, bad numeric fields, empty/invalid JSON) are
+            // rethrown as-is so callers like BookService.uploadBook can surface them as 400s, rather
+            // than being masked here as a generic 500.
             throw exception;
         } catch (Exception e) {
             throw new IllegalStateException("Unable to parse book resource: " + resource.getFilename(), e);
@@ -121,7 +124,12 @@ public class BookLoaderService {
             ConsequenceDto consequenceDto = optionDto.getConsequence();
             Integer value = null;
             if (consequenceDto.getValue() != null && !consequenceDto.getValue().isBlank()) {
-                value = Integer.parseInt(consequenceDto.getValue());
+                try {
+                    value = Integer.parseInt(consequenceDto.getValue());
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(
+                            "Invalid consequence value '" + consequenceDto.getValue() + "': must be a whole number.", e);
+                }
             }
             ConsequenceType type = ConsequenceType.valueOf(consequenceDto.getType().getValue());
             consequence = new Consequence(type, value, consequenceDto.getText());

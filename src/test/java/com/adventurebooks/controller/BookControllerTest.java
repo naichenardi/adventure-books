@@ -52,6 +52,30 @@ class BookControllerTest {
     }
 
     @Test
+    void listBooksReturnsEmptyListInsteadOf404WhenNoneMatch() {
+        when(bookService.getAllBooks()).thenReturn(List.of());
+
+        ResponseEntity<List<com.adventurebooks.generated.model.BookDto>> response = controller.listBooks(null, null);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+    }
+
+    @Test
+    void listBooksReturnsEmptyListWhenDifficultyFilterMatchesNothing() {
+        Book book = new Book("Forest", "Ana", com.adventurebooks.model.enums.Difficulty.EASY, List.of());
+        when(bookService.getAllBooks()).thenReturn(List.of(book));
+
+        ResponseEntity<List<com.adventurebooks.generated.model.BookDto>> response =
+                controller.listBooks(null, DifficultyDto.HARD);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+    }
+
+    @Test
     void getBookByIdThrows404WhenMissing() {
         when(bookService.getBookById(99L)).thenReturn(Optional.empty());
 

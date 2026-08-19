@@ -133,6 +133,56 @@ class BookLoaderServiceTest {
     }
 
     @Test
+    void loadBookThrowsIllegalArgumentExceptionForInvalidConsequenceValue() {
+        ConsequenceDto consequence = new ConsequenceDto(ConsequenceTypeDto.LOSE_HEALTH);
+        consequence.setValue("not-a-number");
+
+        OptionDto option = new OptionDto("Fight", "2");
+        option.setConsequence(consequence);
+
+        SectionDto sectionStart = new SectionDto("1", "Start", SectionTypeDto.BEGIN);
+        sectionStart.setOptions(List.of(option));
+
+        ByteArrayResource resource = createResource("broken-consequence.json");
+        when(objectMapper.readValue(any(byte[].class), eq(BookDto.class)))
+                .thenReturn(bookDtoOf("Broken", "Author", DifficultyDto.EASY, List.of(sectionStart)));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.loadBook(resource)
+        );
+
+        assertTrue(exception.getMessage().contains("Invalid consequence value 'not-a-number'"));
+    }
+
+    @Test
+    void loadBooksSkipsResourceWithInvalidConsequenceValueInsteadOfFailingStartup() throws IOException {
+        ConsequenceDto consequence = new ConsequenceDto(ConsequenceTypeDto.LOSE_HEALTH);
+        consequence.setValue("not-a-number");
+
+        OptionDto option = new OptionDto("Fight", "2");
+        option.setConsequence(consequence);
+
+        SectionDto sectionStart = new SectionDto("1", "Start", SectionTypeDto.BEGIN);
+        sectionStart.setOptions(List.of(option));
+
+        ByteArrayResource brokenResource = createResource("broken-consequence.json");
+        ByteArrayResource okResource = createResource("ok.json");
+        when(resourcePatternResolver.getResources("classpath*:books/*.json"))
+                .thenReturn(new ByteArrayResource[]{brokenResource, okResource});
+        when(objectMapper.readValue(any(byte[].class), eq(BookDto.class)))
+                .thenReturn(
+                        bookDtoOf("Broken", "Author", DifficultyDto.EASY, List.of(sectionStart)),
+                        bookDtoOf("The Prisoner", "Daniel El Fuego", DifficultyDto.HARD, List.of())
+                );
+
+        List<Book> books = service.loadBooks();
+
+        assertEquals(1, books.size());
+        assertEquals("The Prisoner", books.getFirst().getTitle());
+    }
+
+    @Test
     void loadBooksThrowsWhenResolverFails() throws IOException {
         when(resourcePatternResolver.getResources("classpath*:books/*.json"))
                 .thenThrow(new IOException("resolver failure"));
