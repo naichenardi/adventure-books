@@ -1,0 +1,138 @@
+.game-page {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 1.4rem 1rem 2.8rem;
+}
+
+.game-page__header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.7rem;
+  align-items: center;
+  margin-bottom: 1.1rem;
+}
+
+.game-page__header a {
+  color: #5c4636;
+  text-decoration: none;
+  font-weight: 700;
+  justify-self: start;
+}
+
+.game-page__header span {
+  border: 1px solid #ecdcc9;
+  background: #f7f0e7;
+  color: #564334;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.2rem 0.68rem;
+  justify-self: center;
+}
+
+.game-page__header button {
+  border: 1px solid #e8d6c2;
+  border-radius: 8px;
+  background: #fff;
+  color: #564334;
+  font-weight: 700;
+  padding: 0.45rem 0.65rem;
+  justify-self: end;
+}
+
+.game-page__header button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.game-page__save-status,
+.game-page__resume-link {
+  margin: 0 0 0.8rem;
+  border: 1px solid #d8e7cf;
+  border-radius: 10px;
+  background: #f1f8ec;
+  color: #2f5330;
+  padding: 0.65rem 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.game-page__resume-link a {
+  color: #1c5a88;
+}
+
+.game-page__panel {
+  border: 1px solid #ecdcc9;
+  border-radius: 12px;
+  padding: clamp(1.1rem, 2.8vw, 2rem);
+  background: #fffefc;
+  box-shadow: 0 16px 36px rgb(77 45 15 / 6%);
+}
+
+.game-page__panel--error {
+  border-color: #efc0b6;
+  background: #fff0ed;
+}
+
+.game-page__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.game-page__stats span {
+  border: 1px solid #ecdcc9;
+  border-radius: 999px;
+  background: #f7f0e7;
+  color: #5c4634;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+}
+
+.game-page__stats .is-finished {
+  background: #dff3df;
+  border-color: #bbdfbc;
+  color: #1f5e27;
+}
+
+.game-page__stats .is-saved {
+  background: #e2efff;
+  border-color: #c2daf7;
+  color: #224773;
+}
+
+.game-page__panel h1 {
+  text-align: center;
+  margin: 0;
+  color: #3d2b1f;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+}
+
+.game-page__panel p {
+  color: #4e3b2f;
+  line-height: 1.75;
+  font-size: 1.04rem;
+}
+
+.game-page__panel h2 {
+  margin-top: 1.35rem;
+  color: #3e2c20;
+  font-size: 1.35rem;
+}
+
+.game-page__choices {
+  display: grid;
+  gap: 0.74rem;
+}
+
+@media (max-width: 720px) {
+  .game-page__header {
+    grid-template-columns: 1fr;
+  }
+
+  .game-page__header span,
+  .game-page__header button {
+    justify-self: start;
+  }
+}

@@ -1,0 +1,56 @@
+<main class="game-page">
+  <header class="game-page__header">
+    <a routerLink="/">&#8592; Back to Library</a>
+    <span>{{ book()?.title || 'Loading Adventure' }}</span>
+    <button type="button" (click)="saveProgress()" [disabled]="actionInProgress() || !session()?.id">
+      &#128190; Save Progress
+    </button>
+  </header>
+
+  @if (saveStatusMessage()) {
+    <p class="game-page__save-status">{{ saveStatusMessage() }}</p>
+  }
+
+  @if (resumeUrl()) {
+    <p class="game-page__resume-link">
+      Resume URL:
+      <a [href]="resumeUrl()" target="_blank" rel="noopener">{{ resumeUrl() }}</a>
+    </p>
+  }
+
+  @if (loading()) {
+    <section class="game-page__panel">
+      <p>Loading game session...</p>
+    </section>
+  } @else if (errorMessage()) {
+    <section class="game-page__panel game-page__panel--error">
+      <p>{{ errorMessage() }}</p>
+    </section>
+  } @else {
+    <section class="game-page__panel">
+      <div class="game-page__stats">
+        <span>HP: {{ session()?.health ?? 'n/a' }}</span>
+        <span [class.is-finished]="session()?.finished">{{ session()?.finished ? 'Finished' : 'In Progress' }}</span>
+        <span [class.is-saved]="session()?.saved">{{ session()?.saved ? 'Saved' : 'Unsaved' }}</span>
+      </div>
+
+      <h1>{{ sectionTitle() }}</h1>
+
+      @for (paragraph of sectionParagraphs(); track paragraph) {
+        <p>{{ paragraph }}</p>
+      }
+
+      @if ((currentSection()?.options?.length || 0) > 0 && !session()?.finished) {
+        <h2>What do you choose?</h2>
+
+        <div class="game-page__choices">
+          @for (option of currentSection()?.options || []; track option.gotoId; let idx = $index) {
+            <app-choice-card [option]="option" [index]="idx" [disabled]="!canChoose()" (choose)="chooseOption($event)" />
+          }
+        </div>
+      } @else {
+        <h2>This path has reached an ending.</h2>
+      }
+    </section>
+  }
+</main>
