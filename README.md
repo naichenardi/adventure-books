@@ -217,11 +217,12 @@ Interfaces and model classes are generated automatically during the build under 
 
 ### Books
 
-| Method | Endpoint                   | Description                                                      |
-|--------|----------------------------|------------------------------------------------------------------|
-| `GET`  | `/api/books`               | List all books (supports `query` and `difficulty` filter params) |
-| `GET`  | `/api/books/{id}`          | Get a single book by id                                          |
-| `GET`  | `/api/books/{id}/validate` | Validate book against game rules                                 |
+| Method | Endpoint                   | Description                                                              |
+|--------|----------------------------|--------------------------------------------------------------------------|
+| `GET`  | `/api/books`               | List all books (supports `query` and `difficulty` filter params)         |
+| `POST` | `/api/books/upload`        | Upload a new book from a JSON file (`multipart/form-data`, field `file`) |
+| `GET`  | `/api/books/{id}`          | Get a single book by id                                                  |
+| `GET`  | `/api/books/{id}/validate` | Validate book against game rules                                         |
 
 ### Game Sessions
 
