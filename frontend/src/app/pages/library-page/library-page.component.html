@@ -30,6 +30,8 @@
       [selected]="filterLabel(selectedFilter())"
       (selectedChange)="selectFilter($event)"
     />
+
+    <a class="library-page__add-book" routerLink="/add-book">&#10133; Add Book</a>
   </section>
 
   @if (loading()) {

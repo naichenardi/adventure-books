@@ -1,0 +1,154 @@
+.add-book-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.4rem 1rem 2.8rem;
+}
+
+.add-book-page__header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.7rem;
+  align-items: center;
+  margin-bottom: 1.1rem;
+}
+
+.add-book-page__header a {
+  color: #5c4636;
+  text-decoration: none;
+  font-weight: 700;
+  justify-self: start;
+}
+
+.add-book-page__header span {
+  border: 1px solid #ecdcc9;
+  background: #f7f0e7;
+  color: #564334;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.2rem 0.68rem;
+  justify-self: end;
+}
+
+.add-book-page__panel {
+  border: 1px solid #ecdcc9;
+  border-radius: 12px;
+  padding: clamp(1.1rem, 2.8vw, 2rem);
+  background: #fffefc;
+  box-shadow: 0 16px 36px rgb(77 45 15 / 6%);
+}
+
+.add-book-page__panel h1 {
+  margin: 0 0 0.6rem;
+  color: #3d2b1f;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.add-book-page__panel p {
+  color: #5a483a;
+  line-height: 1.6;
+}
+
+.add-book-page__panel code {
+  background: #f7f0e7;
+  border: 1px solid #ecdcc9;
+  border-radius: 4px;
+  padding: 0.05rem 0.3rem;
+  font-size: 0.92em;
+}
+
+.add-book-page__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+  border: 2px dashed #eadac8;
+  border-radius: 12px;
+  background: #fbf5ec;
+  color: #6f5b47;
+  padding: 2.2rem 1.2rem;
+  margin: 1.2rem 0;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.add-book-page__dropzone.is-dragging {
+  border-color: #c58725;
+  background: #fbeed4;
+}
+
+.add-book-page__dropzone.has-file {
+  border-style: solid;
+  background: #f8f1e8;
+}
+
+.add-book-page__browse {
+  color: #a3671a;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.add-book-page__browse input {
+  display: none;
+}
+
+.add-book-page__filename {
+  font-weight: 700;
+  color: #4e3b2f;
+  word-break: break-all;
+}
+
+.add-book-page__remove {
+  border: 1px solid #e8d6c2;
+  border-radius: 8px;
+  background: #fff;
+  color: #564334;
+  font-weight: 600;
+  padding: 0.32rem 0.65rem;
+  cursor: pointer;
+}
+
+.add-book-page__status {
+  margin: 0 0 1rem;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+}
+
+.add-book-page__status--error {
+  border: 1px solid #efc0b6;
+  background: #fff0ed;
+  color: #7e2617;
+}
+
+.add-book-page__actions {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.add-book-page__actions button {
+  border: 1px solid #e8d6c2;
+  border-radius: 8px;
+  background: #fff;
+  color: #564334;
+  font-weight: 700;
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+}
+
+.add-book-page__actions button.is-primary {
+  border: none;
+  background: linear-gradient(90deg, #ac6f16, #efbe50);
+  color: #fff;
+}
+
+.add-book-page__actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.add-book-page__panel--success h1 {
+  color: #1f5e27;
+}

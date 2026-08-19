@@ -30,6 +30,22 @@
   margin-bottom: 1.2rem;
 }
 
+.library-page__add-book {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  border: 1px solid #e8d6c2;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ac6f16, #efbe50);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.86rem;
+  text-decoration: none;
+  padding: 0.4rem 0.85rem;
+}
+
 .search-field {
   display: flex;
   gap: 0.45rem;

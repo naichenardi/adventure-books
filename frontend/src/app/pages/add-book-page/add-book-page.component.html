@@ -1,0 +1,56 @@
+<main class="add-book-page">
+  <header class="add-book-page__header">
+    <a routerLink="/">&#8592; Back to Library</a>
+    <span>Add an Adventure</span>
+  </header>
+
+  @if (createdBook(); as book) {
+    <section class="add-book-page__panel add-book-page__panel--success">
+      <h1>&#127881; "{{ book.title }}" was added!</h1>
+      <p>Your adventure has been validated and saved to the library.</p>
+      <div class="add-book-page__actions">
+        <button type="button" class="is-primary" (click)="playNow()">Play Now</button>
+        <button type="button" (click)="addAnother()">Add Another Book</button>
+      </div>
+    </section>
+  } @else {
+    <section class="add-book-page__panel">
+      <h1>&#128214; Upload a New Book</h1>
+      <p>
+        Books are defined as JSON files describing a title and a graph of sections. Each book needs
+        exactly one <code>BEGIN</code> section, at least one <code>END</code> section, and every
+        option's <code>gotoId</code> must point to a section that exists.
+      </p>
+
+      <div
+        class="add-book-page__dropzone"
+        [class.is-dragging]="isDragging()"
+        [class.has-file]="selectedFile()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+        @if (selectedFile(); as file) {
+          <p class="add-book-page__filename">&#128196; {{ file.name }}</p>
+          <button type="button" class="add-book-page__remove" (click)="removeFile()">Remove</button>
+        } @else {
+          <p>Drag &amp; drop a book JSON file here</p>
+          <label class="add-book-page__browse">
+            or browse files
+            <input type="file" accept=".json,application/json" (change)="onFileInputChange($event)" />
+          </label>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <p class="add-book-page__status add-book-page__status--error">{{ errorMessage() }}</p>
+      }
+
+      <div class="add-book-page__actions">
+        <button type="button" class="is-primary" [disabled]="!selectedFile() || uploading()" (click)="upload()">
+          {{ uploading() ? 'Uploading...' : 'Upload Book' }}
+        </button>
+      </div>
+    </section>
+  }
+</main>

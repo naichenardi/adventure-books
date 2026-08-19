@@ -25,6 +25,12 @@ export class AdventureApiService {
     return this.http.get<Book>(`${this.baseUrl}/books/${id}`);
   }
 
+  uploadBook(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<Book>(`${this.baseUrl}/books/upload`, formData);
+  }
+
   startSession(bookId: number) {
     return this.http.post<GameSession>(`${this.baseUrl}/sessions`, {bookId});
   }

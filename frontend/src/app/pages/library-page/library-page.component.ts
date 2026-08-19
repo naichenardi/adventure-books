@@ -1,5 +1,5 @@
 import {Component, DestroyRef, effect, inject, signal} from '@angular/core';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {debounceTime, Subject, switchMap} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {BookCardComponent} from '../../components/book-card/book-card.component';
@@ -13,7 +13,7 @@ type DifficultyFilter = 'ALL' | Difficulty;
 
 @Component({
   selector: 'app-library-page',
-  imports: [HeroBannerComponent, FilterBarComponent, BookCardComponent],
+  imports: [HeroBannerComponent, FilterBarComponent, BookCardComponent, RouterLink],
   templateUrl: './library-page.component.html',
   styleUrl: './library-page.component.scss'
 })
