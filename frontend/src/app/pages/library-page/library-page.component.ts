@@ -100,7 +100,7 @@ export class LibraryPageComponent {
 
     this.api.getSessionById(savedSessionId).subscribe({
       next: (session) => {
-        const canResume = session.saved && session.bookId === bookId;
+        const canResume = session.saved && !session.finished && session.bookId === bookId;
 
         if (canResume) {
           this.router.navigate(['/play'], {queryParams: {sessionId: savedSessionId}}).finally(() => {

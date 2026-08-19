@@ -108,6 +108,7 @@ export class GamePageComponent {
     this.api.chooseOption(sessionId, optionIndex).subscribe({
       next: (session) => {
         this.session.set(session);
+        this.syncSavedSession(session);
         this.actionInProgress.set(false);
       },
       error: (error) => {
@@ -244,7 +245,7 @@ export class GamePageComponent {
       return;
     }
 
-    if (session.saved) {
+    if (session.saved && !session.finished) {
       this.savedSessionService.setSavedSessionId(resolvedBookId, resolvedSessionId);
       return;
     }
